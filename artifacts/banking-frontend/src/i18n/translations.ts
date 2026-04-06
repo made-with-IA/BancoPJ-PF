@@ -5,8 +5,13 @@ export const translations = {
       clients: "Clientes",
       settings: "Configurações",
     },
+    app: {
+      name: "Sistema Bancário",
+      role: "Admin",
+    },
     dashboard: {
       title: "Dashboard",
+      subtitle: "Visão geral do sistema bancário",
       totalPF: "Clientes PF",
       totalPJ: "Clientes PJ",
       balancePF: "Saldo Total PF",
@@ -16,6 +21,7 @@ export const translations = {
     },
     clients: {
       title: "Clientes",
+      subtitle: "Gerencie clientes Pessoa Física e Pessoa Jurídica",
       newClient: "Novo Cliente",
       individual: "Pessoa Física (PF)",
       business: "Pessoa Jurídica (PJ)",
@@ -110,6 +116,7 @@ export const translations = {
     },
     settings: {
       title: "Configurações",
+      subtitle: "Preferências do sistema",
       language: "Idioma",
       currencyFormat: "Formato de Moeda",
       dateFormat: "Formato de Data",
@@ -136,8 +143,13 @@ export const translations = {
       clients: "Clients",
       settings: "Settings",
     },
+    app: {
+      name: "Banking System",
+      role: "Admin",
+    },
     dashboard: {
       title: "Dashboard",
+      subtitle: "Banking system overview",
       totalPF: "Individual Clients",
       totalPJ: "Business Clients",
       balancePF: "Total Balance (Ind.)",
@@ -147,6 +159,7 @@ export const translations = {
     },
     clients: {
       title: "Clients",
+      subtitle: "Manage Individual and Business clients",
       newClient: "New Client",
       individual: "Individual (PF)",
       business: "Business (PJ)",
@@ -241,6 +254,7 @@ export const translations = {
     },
     settings: {
       title: "Settings",
+      subtitle: "System preferences",
       language: "Language",
       currencyFormat: "Currency Format",
       dateFormat: "Date Format",

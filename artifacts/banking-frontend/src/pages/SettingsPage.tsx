@@ -57,7 +57,7 @@ export default function SettingsPage() {
     <div>
       <PageHeader
         title={t.settings.title}
-        subtitle="Preferências do sistema"
+        subtitle={t.settings.subtitle}
       />
 
       <div className="max-w-lg">

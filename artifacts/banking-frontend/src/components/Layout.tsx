@@ -43,8 +43,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Building2 size={18} className="text-sidebar-primary-foreground" />
         </div>
         <div>
-          <p className="text-sm font-bold text-sidebar-foreground leading-tight">Sistema Bancário</p>
-          <p className="text-xs text-sidebar-foreground/60">Admin</p>
+          <p className="text-sm font-bold text-sidebar-foreground leading-tight">{t.app.name}</p>
+          <p className="text-xs text-sidebar-foreground/60">{t.app.role}</p>
         </div>
       </div>
       <nav className="flex-1 p-3 space-y-1">
@@ -88,7 +88,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </button>
           <div className="flex items-center gap-2">
             <Building2 size={18} className="text-primary" />
-            <span className="text-sm font-semibold">Sistema Bancário</span>
+            <span className="text-sm font-semibold">{t.app.name}</span>
           </div>
         </header>
 

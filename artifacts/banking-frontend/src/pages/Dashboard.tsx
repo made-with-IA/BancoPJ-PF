@@ -60,7 +60,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-page-title">{t.dashboard.title}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Visão geral do sistema bancário</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t.dashboard.subtitle}</p>
         </div>
         <Link href="/clientes/novo">
           <Button data-testid="button-new-client">

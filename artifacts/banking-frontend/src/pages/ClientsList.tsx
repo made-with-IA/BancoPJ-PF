@@ -87,7 +87,7 @@ export default function ClientsList() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-page-title">{t.clients.title}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Gerencie clientes Pessoa Física e Pessoa Jurídica</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{t.clients.subtitle}</p>
         </div>
         <Link href="/clientes/novo">
           <Button data-testid="button-new-client">
