@@ -1,0 +1,423 @@
+Create a frontend-focused banking system web application optimized for Replit.
+
+Important rules:
+- All source code must be written in English.
+- All user-facing interface text must be written in Brazilian Portuguese.
+- The frontend must be the main focus of the project.
+- The application must consume an existing REST API.
+- The system must be designed to interact with a banking API that supports Individual Clients, Business Clients, withdrawals, statements, settings, and exports.
+- Default interface language must be Portuguese.
+- The settings screen must allow Portuguese and English selection.
+- Currency and date format must be configurable in the frontend.
+- The project must be easy to run in Replit.
+
+# Main Goal
+Build a complete frontend application for a banking system that interacts with an API.
+
+The frontend must allow users to:
+- visualize dashboard information
+- create clients
+- list clients
+- filter clients
+- paginate client lists
+- edit clients
+- delete clients
+- perform withdrawals
+- view statements
+- change settings
+- export data through API endpoints
+- switch language and formatting options
+
+# Frontend Stack
+Use a frontend stack that works well in Replit.
+
+Preferred stack:
+- React
+- TypeScript
+- Vite
+- React Router
+- Axios or Fetch API
+- React Hook Form
+- Zod
+- TanStack Query (optional but recommended)
+- Tailwind CSS for styling
+- shadcn/ui if helpful
+- date-fns for date formatting
+
+Keep the project practical and not overly complex.
+
+# Application Type
+This is a frontend-only project or frontend-first project.
+Assume the backend API already exists.
+
+The frontend must communicate with the API using HTTP requests.
+
+# API Integration Assumptions
+Assume the backend exposes endpoints such as:
+
+## Individual Clients
+- GET /api/individual-clients
+- GET /api/individual-clients/:id
+- POST /api/individual-clients
+- PUT /api/individual-clients/:id
+- DELETE /api/individual-clients/:id
+- POST /api/individual-clients/:id/withdraw
+- GET /api/individual-clients/:id/statement
+
+## Business Clients
+- GET /api/business-clients
+- GET /api/business-clients/:id
+- POST /api/business-clients
+- PUT /api/business-clients/:id
+- DELETE /api/business-clients/:id
+- POST /api/business-clients/:id/withdraw
+- GET /api/business-clients/:id/statement
+
+## Settings
+- GET /api/settings
+- PUT /api/settings
+
+## Exports
+- GET /api/exports/individual-clients/csv
+- GET /api/exports/individual-clients/pdf
+- GET /api/exports/business-clients/csv
+- GET /api/exports/business-clients/pdf
+
+If needed, create a centralized API service layer to abstract these requests.
+
+# Frontend Architecture
+Organize the frontend with clear structure.
+
+Suggested folders:
+- src/components
+- src/pages
+- src/layouts
+- src/routes
+- src/services
+- src/hooks
+- src/types
+- src/utils
+- src/context
+- src/constants
+- src/i18n or src/locales
+- src/styles
+
+# Required Screens
+
+## 1. Dashboard
+A homepage with summary cards and quick actions.
+
+Suggested content:
+- total de clientes PF
+- total de clientes PJ
+- saldo total agregado
+- número de movimentações recentes
+- atalhos para:
+  - novo cliente
+  - listar clientes
+  - extratos
+  - configurações
+
+All text must be in Portuguese.
+
+## 2. Lista de Clientes
+A main listing page showing both Individual and Business clients.
+
+Requirements:
+- table or card list
+- pagination
+- filters
+- search by name/email
+- filter by client type
+- filter by category
+- filter by balance range
+- actions:
+  - visualizar
+  - editar
+  - excluir
+  - sacar
+  - extrato
+- export buttons:
+  - Exportar PDF
+  - Exportar CSV
+
+This screen must consume paginated API endpoints.
+
+## 3. Novo Cliente
+A form page for creating clients.
+
+Requirements:
+- choose client type:
+  - Pessoa Física
+  - Pessoa Jurídica
+- render dynamic fields based on selected type
+
+### Pessoa Física fields
+- nome completo
+- renda mensal
+- idade
+- celular
+- email
+- categoria
+- saldo
+
+### Pessoa Jurídica fields
+- razão social
+- nome fantasia
+- CNPJ
+- telefone
+- email
+- categoria
+- saldo
+
+Use validation with Portuguese messages.
+
+## 4. Editar Cliente
+A form page similar to the create screen, prefilled with data from the API.
+
+Requirements:
+- load client by id
+- submit updates to API
+- show success and error feedback in Portuguese
+
+## 5. Detalhes do Cliente
+A page to display complete client information.
+
+Requirements:
+- display fields clearly
+- show client type
+- show current balance
+- action buttons for:
+  - editar
+  - excluir
+  - sacar dinheiro
+  - ver extrato
+
+## 6. Saque
+A page or modal to perform a withdrawal.
+
+Requirements:
+- show current balance
+- input for withdrawal amount
+- explanatory Portuguese text
+- submit to withdrawal endpoint
+- display API validation messages
+- refresh client data after success
+
+## 7. Extrato
+A page to display statement and transactions.
+
+Requirements:
+- list transactions
+- show:
+  - tipo da movimentação
+  - valor
+  - descrição
+  - saldo anterior
+  - saldo posterior
+  - data
+- allow filtering by date if API supports it
+- format currency and date according to current settings
+
+## 8. Configurações
+A page to manage frontend settings and synchronize with API.
+
+Requirements:
+- idioma:
+  - português
+  - inglês
+- formato da moeda
+- formato da data
+
+The frontend must:
+- load settings from API
+- save settings to API
+- apply settings in UI formatting
+
+# UI Requirements
+Build a clean modern dashboard-style interface.
+
+Important:
+- interface text in Portuguese
+- responsive layout
+- sidebar or top navigation
+- reusable cards, tables, forms, modals, alerts
+- clear hierarchy
+- accessible form labels
+- loading states
+- empty states
+- error states
+
+Suggested Portuguese navigation:
+- Dashboard
+- Clientes
+- Novo Cliente
+- Extratos
+- Configurações
+
+Suggested actions:
+- Salvar
+- Cancelar
+- Editar
+- Excluir
+- Sacar
+- Ver Extrato
+- Exportar PDF
+- Exportar CSV
+- Filtrar
+- Limpar filtros
+
+# Design Direction
+Create a modern but practical admin interface.
+
+Use:
+- clean cards
+- soft shadows
+- rounded corners
+- responsive spacing
+- intuitive tables
+- subtle transitions
+- modern form layout
+
+Avoid excessive visual effects.
+Prioritize usability.
+
+# State Management
+Use a practical state strategy.
+
+Recommended:
+- React Query or TanStack Query for server state
+- local component state for simple UI interactions
+- context for settings and localization
+
+# Form Handling
+Use:
+- React Hook Form
+- Zod validation
+
+All form messages must be in Portuguese.
+
+Examples:
+- "Nome completo é obrigatório"
+- "E-mail inválido"
+- "Saldo deve ser maior ou igual a zero"
+- "CNPJ é obrigatório"
+
+# Data Formatting
+Implement reusable utility functions for:
+- currency formatting
+- date formatting
+
+These utilities must respond to settings selected in the application.
+
+# Error and Loading Experience
+Every page interacting with the API must have:
+- loading state
+- error state
+- empty state when applicable
+- success feedback after form actions
+
+Examples in Portuguese:
+- "Carregando dados..."
+- "Erro ao carregar informações"
+- "Nenhum registro encontrado"
+- "Cliente salvo com sucesso"
+- "Erro ao excluir cliente"
+
+# Reusable Components
+Create reusable frontend components such as:
+- AppLayout
+- Sidebar
+- Header
+- PageTitle
+- SummaryCard
+- DataTable
+- Pagination
+- FilterBar
+- ClientForm
+- ConfirmDialog
+- WithdrawalForm
+- StatementTable
+- SettingsForm
+- LoadingSpinner
+- EmptyState
+- ErrorMessage
+- Toast or Alert component
+
+# Type Definitions
+Create TypeScript types/interfaces for:
+- IndividualClient
+- BusinessClient
+- Transaction
+- Settings
+- PaginationResponse
+- FilterParams
+- WithdrawalPayload
+- ClientFormPayload
+
+# Routing
+Use React Router and create routes for:
+- /
+- /clientes
+- /clientes/novo
+- /clientes/:type/:id
+- /clientes/:type/:id/editar
+- /clientes/:type/:id/saque
+- /clientes/:type/:id/extrato
+- /configuracoes
+
+# API Layer
+Create a service layer with:
+- api client instance
+- client service
+- statement service
+- settings service
+- export service
+
+Include clean error handling and typed responses.
+
+# Export Feature
+The export buttons must call the API and handle file download properly for:
+- PDF
+- CSV
+
+Use Portuguese labels in the UI.
+
+# Testing
+If possible, create frontend tests for:
+- form rendering
+- validation messages
+- list rendering
+- pagination controls
+- settings update
+- withdrawal submission
+
+Use lightweight test setup compatible with Replit.
+
+# Deliverables
+Generate a complete frontend project with:
+1. folder structure
+2. package.json
+3. tsconfig.json
+4. vite config
+5. React app structure
+6. routes
+7. pages
+8. reusable components
+9. service layer
+10. types
+11. hooks
+12. utility functions
+13. styles
+14. sample environment configuration
+15. README with Replit instructions
+
+# Final Output Requirements
+Do not provide only explanations.
+Generate the real frontend project files.
+
+At the end, include:
+- final project tree
+- how to run in Replit
+- where to configure API base URL
+- summary of key architectural decisions

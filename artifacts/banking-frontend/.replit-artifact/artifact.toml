@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/banking-frontend/"
+title = "Sistema Bancário — Frontend"
+version = "1.0.0"
+id = "artifacts/banking-frontend"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/banking-frontend/", "/api/" ]
+localPort = 19234
+
+[services.development]
+run = "pnpm --filter @workspace/banking-frontend run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/banking-frontend", "run", "build" ]
+publicDir = "artifacts/banking-frontend/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19234"
+BASE_PATH = "/banking-frontend/"

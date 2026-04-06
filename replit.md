@@ -10,10 +10,35 @@ pnpm workspace monorepo using TypeScript. Contains a complete banking system (Si
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5
+- **Backend**: Express 5 + EJS + SQLite (`artifacts/banking-system`, port 3000)
+- **Frontend**: React + Vite + shadcn/ui + TanStack Query (`artifacts/banking-frontend`, port 19234)
 - **Database**: SQLite via better-sqlite3 (file: `artifacts/banking-system/banking.db`)
-- **Template engine**: EJS (server-rendered, no React/Vite)
 - **Testing**: Jest + Supertest (34 tests, 3 suites)
+
+## Frontend (banking-frontend)
+
+Located at `artifacts/banking-frontend/`, served at `/banking-frontend/`.
+
+### Pages
+- `/` — Dashboard with KPI cards and recent clients
+- `/clientes` — Unified client list (PF/PJ tabs) with search, filter, export, CRUD actions
+- `/clientes/novo` — New client form (PF/PJ selector with dynamic fields)
+- `/clientes/pf/:id` — Individual client detail
+- `/clientes/pj/:id` — Business client detail
+- `/clientes/pf/:id/editar` — Edit individual client
+- `/clientes/pj/:id/editar` — Edit business client
+- `/clientes/pf/:id/saque` — Withdraw from individual (limit R$1,000)
+- `/clientes/pj/:id/saque` — Withdraw from business (limit R$5,000)
+- `/clientes/pf/:id/extrato` — Individual client statement
+- `/clientes/pj/:id/extrato` — Business client statement
+- `/configuracoes` — Settings (language, currency, date format)
+
+### Architecture
+- API calls via Vite proxy: `/api` → `localhost:3000`
+- Proxy path `/api/` registered in artifact.toml so Replit routes API calls to port 19234
+- `SettingsContext` provides global settings + i18n (PT/EN translations)
+- `formatCurrency` and `formatDate` respect user settings
+- All forms use React Hook Form + Zod with Portuguese validation messages
 
 ## Key Commands
 
