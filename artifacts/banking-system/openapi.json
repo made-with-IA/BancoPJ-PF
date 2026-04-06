@@ -1,0 +1,1378 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sistema Bancário API",
+    "description": "API REST do Sistema Bancário. Gerencia clientes Pessoa Física (PF) e Pessoa Jurídica (PJ), realiza saques, consulta extratos e exporta relatórios em PDF e CSV.\n\n**Limites de saque:**\n- Pessoa Física: R$ 1.000,00 por operação\n- Pessoa Jurídica: R$ 5.000,00 por operação\n\n**Base URL:** `http://localhost:3000/api`",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Sistema Bancário"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Servidor de desenvolvimento"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Clientes PF",
+      "description": "Operações com clientes Pessoa Física"
+    },
+    {
+      "name": "Clientes PJ",
+      "description": "Operações com clientes Pessoa Jurídica"
+    },
+    {
+      "name": "Configurações",
+      "description": "Configurações de idioma, moeda e formato de data"
+    },
+    {
+      "name": "Exportações",
+      "description": "Exportação de relatórios em PDF e CSV"
+    }
+  ],
+  "paths": {
+    "/individual-clients": {
+      "get": {
+        "tags": ["Clientes PF"],
+        "summary": "Listar clientes PF",
+        "description": "Retorna lista paginada de clientes Pessoa Física com suporte a filtros.",
+        "operationId": "listIndividualClients",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da página (começa em 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Quantidade de registros por página",
+            "schema": { "type": "integer", "default": 10, "minimum": 1, "maximum": 100 }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filtrar por nome (busca parcial, case-insensitive)",
+            "schema": { "type": "string", "example": "Ana Paula" }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "description": "Filtrar por e-mail (busca parcial)",
+            "schema": { "type": "string", "example": "ana@email.com" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filtrar por categoria",
+            "schema": {
+              "type": "string",
+              "enum": ["standard", "premium", "vip"]
+            }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "description": "Saldo mínimo",
+            "schema": { "type": "number", "example": 1000 }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "description": "Saldo máximo",
+            "schema": { "type": "number", "example": 50000 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de clientes PF retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IndividualClientPage" },
+                "example": {
+                  "data": [
+                    {
+                      "id": 1,
+                      "fullName": "Ana Paula Silva",
+                      "monthlyIncome": 5000,
+                      "age": 32,
+                      "phone": "11999991111",
+                      "email": "ana.paula@email.com",
+                      "category": "premium",
+                      "balance": 14500,
+                      "createdAt": "2026-04-06 00:53:56",
+                      "updatedAt": "2026-04-06 00:55:11"
+                    }
+                  ],
+                  "total": 35,
+                  "page": 1,
+                  "limit": 10,
+                  "totalPages": 4
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Clientes PF"],
+        "summary": "Criar cliente PF",
+        "description": "Cadastra um novo cliente Pessoa Física.",
+        "operationId": "createIndividualClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateIndividualClientRequest" },
+              "example": {
+                "fullName": "João da Silva",
+                "age": 35,
+                "monthlyIncome": 8000,
+                "phone": "11988887777",
+                "email": "joao.silva@email.com",
+                "category": "premium",
+                "balance": 5000
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cliente criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IndividualClient" },
+                "example": {
+                  "id": 36,
+                  "fullName": "João da Silva",
+                  "monthlyIncome": 8000,
+                  "age": 35,
+                  "phone": "11988887777",
+                  "email": "joao.silva@email.com",
+                  "category": "premium",
+                  "balance": 5000,
+                  "createdAt": "2026-04-06 12:00:00",
+                  "updatedAt": "2026-04-06 12:00:00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" },
+                "example": {
+                  "error": "Validation Error",
+                  "errors": [
+                    { "field": "fullName", "message": "Nome completo é obrigatório" },
+                    { "field": "age", "message": "Idade inválida" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/individual-clients/{id}": {
+      "get": {
+        "tags": ["Clientes PF"],
+        "summary": "Buscar cliente PF por ID",
+        "operationId": "getIndividualClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente encontrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IndividualClient" },
+                "example": {
+                  "id": 1,
+                  "fullName": "Ana Paula Silva",
+                  "monthlyIncome": 5000,
+                  "age": 32,
+                  "phone": "11999991111",
+                  "email": "ana.paula@email.com",
+                  "category": "premium",
+                  "balance": 14500,
+                  "createdAt": "2026-04-06 00:53:56",
+                  "updatedAt": "2026-04-06 00:55:11"
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Clientes PF"],
+        "summary": "Atualizar cliente PF",
+        "description": "Atualiza parcialmente os dados de um cliente PF. Todos os campos são opcionais.",
+        "operationId": "updateIndividualClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateIndividualClientRequest" },
+              "example": {
+                "monthlyIncome": 9000,
+                "category": "vip",
+                "phone": "11911112222"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cliente atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IndividualClient" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Clientes PF"],
+        "summary": "Excluir cliente PF",
+        "description": "Remove permanentemente o cliente e todo o seu histórico de transações.",
+        "operationId": "deleteIndividualClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente excluído com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessage" },
+                "example": {
+                  "success": true,
+                  "message": "Cliente excluído com sucesso"
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/individual-clients/{id}/withdraw": {
+      "post": {
+        "tags": ["Clientes PF"],
+        "summary": "Realizar saque (PF)",
+        "description": "Realiza um saque na conta do cliente PF. O limite máximo por operação é **R$ 1.000,00**. O saldo deve ser suficiente.",
+        "operationId": "withdrawIndividualClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WithdrawRequest" },
+              "example": {
+                "amount": 500,
+                "description": "Saque em dinheiro"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saque realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WithdrawResponse" },
+                "example": {
+                  "success": true,
+                  "transaction": {
+                    "id": 42,
+                    "clientId": 1,
+                    "clientType": "individual",
+                    "transactionType": "withdrawal",
+                    "amount": 500,
+                    "description": "Saque em dinheiro",
+                    "previousBalance": 14500,
+                    "newBalance": 14000,
+                    "createdAt": "2026-04-06 12:30:00"
+                  },
+                  "newBalance": 14000
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Saque não permitido — limite excedido ou saldo insuficiente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "limitExceeded": {
+                    "summary": "Limite de saque excedido",
+                    "value": {
+                      "error": "O valor máximo de saque para Pessoa Física é R$ 1.000,00"
+                    }
+                  },
+                  "insufficientBalance": {
+                    "summary": "Saldo insuficiente",
+                    "value": {
+                      "error": "Saldo insuficiente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/individual-clients/{id}/statement": {
+      "get": {
+        "tags": ["Clientes PF"],
+        "summary": "Extrato do cliente PF",
+        "description": "Retorna o histórico paginado de transações do cliente PF.",
+        "operationId": "statementIndividualClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "description": "Filtrar por tipo de transação",
+            "schema": {
+              "type": "string",
+              "enum": ["withdrawal", "deposit"]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Data inicial (YYYY-MM-DD)",
+            "schema": { "type": "string", "format": "date", "example": "2026-01-01" }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Data final (YYYY-MM-DD)",
+            "schema": { "type": "string", "format": "date", "example": "2026-12-31" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Extrato retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatementPage" },
+                "example": {
+                  "transactions": [
+                    {
+                      "id": 7,
+                      "clientId": 1,
+                      "clientType": "individual",
+                      "transactionType": "withdrawal",
+                      "amount": 500,
+                      "description": "Saque",
+                      "previousBalance": 15000,
+                      "newBalance": 14500,
+                      "createdAt": "2026-04-06 00:55:11"
+                    }
+                  ],
+                  "currentBalance": 14500,
+                  "total": 7,
+                  "page": 1,
+                  "limit": 10,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/business-clients": {
+      "get": {
+        "tags": ["Clientes PJ"],
+        "summary": "Listar clientes PJ",
+        "description": "Retorna lista paginada de clientes Pessoa Jurídica com suporte a filtros.",
+        "operationId": "listBusinessClients",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10, "maximum": 100 }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Filtrar por razão social ou nome fantasia (busca parcial)",
+            "schema": { "type": "string", "example": "Tech Solutions" }
+          },
+          {
+            "name": "cnpj",
+            "in": "query",
+            "description": "Filtrar por CNPJ (busca parcial)",
+            "schema": { "type": "string", "example": "11.222" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["standard", "corporate", "enterprise"]
+            }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de clientes PJ retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BusinessClientPage" },
+                "example": {
+                  "data": [
+                    {
+                      "id": 1,
+                      "companyName": "Tech Solutions Ltda",
+                      "tradeName": "TechSol",
+                      "cnpj": "11.222.333/0001-44",
+                      "phone": "1133334444",
+                      "email": "contato@techsol.com.br",
+                      "category": "corporate",
+                      "balance": 150000,
+                      "createdAt": "2026-04-06 00:53:56",
+                      "updatedAt": "2026-04-06 00:53:56"
+                    }
+                  ],
+                  "total": 9,
+                  "page": 1,
+                  "limit": 10,
+                  "totalPages": 1
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Clientes PJ"],
+        "summary": "Criar cliente PJ",
+        "description": "Cadastra um novo cliente Pessoa Jurídica. O CNPJ deve ser único no sistema.",
+        "operationId": "createBusinessClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateBusinessClientRequest" },
+              "example": {
+                "companyName": "Inovação Digital Ltda",
+                "tradeName": "InovaDigital",
+                "cnpj": "22.333.444/0001-55",
+                "phone": "1144445555",
+                "email": "contato@inovadigital.com.br",
+                "category": "enterprise",
+                "balance": 100000
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cliente PJ criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BusinessClient" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/business-clients/{id}": {
+      "get": {
+        "tags": ["Clientes PJ"],
+        "summary": "Buscar cliente PJ por ID",
+        "operationId": "getBusinessClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente PJ encontrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BusinessClient" },
+                "example": {
+                  "id": 1,
+                  "companyName": "Tech Solutions Ltda",
+                  "tradeName": "TechSol",
+                  "cnpj": "11.222.333/0001-44",
+                  "phone": "1133334444",
+                  "email": "contato@techsol.com.br",
+                  "category": "corporate",
+                  "balance": 150000,
+                  "createdAt": "2026-04-06 00:53:56",
+                  "updatedAt": "2026-04-06 00:53:56"
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Clientes PJ"],
+        "summary": "Atualizar cliente PJ",
+        "description": "Atualiza parcialmente os dados do cliente PJ. Todos os campos são opcionais.",
+        "operationId": "updateBusinessClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateBusinessClientRequest" },
+              "example": {
+                "tradeName": "TechSol Premium",
+                "category": "enterprise",
+                "email": "novo@techsol.com.br"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cliente PJ atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BusinessClient" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Clientes PJ"],
+        "summary": "Excluir cliente PJ",
+        "description": "Remove permanentemente o cliente PJ e todo o seu histórico de transações.",
+        "operationId": "deleteBusinessClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente PJ excluído com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessMessage" },
+                "example": {
+                  "success": true,
+                  "message": "Cliente excluído com sucesso"
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/business-clients/{id}/withdraw": {
+      "post": {
+        "tags": ["Clientes PJ"],
+        "summary": "Realizar saque (PJ)",
+        "description": "Realiza um saque na conta do cliente PJ. O limite máximo por operação é **R$ 5.000,00**. O saldo deve ser suficiente.",
+        "operationId": "withdrawBusinessClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WithdrawRequest" },
+              "example": {
+                "amount": 3000,
+                "description": "Pagamento de fornecedor"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saque realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WithdrawResponse" },
+                "example": {
+                  "success": true,
+                  "transaction": {
+                    "id": 55,
+                    "clientId": 1,
+                    "clientType": "business",
+                    "transactionType": "withdrawal",
+                    "amount": 3000,
+                    "description": "Pagamento de fornecedor",
+                    "previousBalance": 150000,
+                    "newBalance": 147000,
+                    "createdAt": "2026-04-06 13:00:00"
+                  },
+                  "newBalance": 147000
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Saque não permitido",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "examples": {
+                  "limitExceeded": {
+                    "summary": "Limite de saque excedido",
+                    "value": {
+                      "error": "O valor máximo de saque para Pessoa Jurídica é R$ 5.000,00"
+                    }
+                  },
+                  "insufficientBalance": {
+                    "summary": "Saldo insuficiente",
+                    "value": {
+                      "error": "Saldo insuficiente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/business-clients/{id}/statement": {
+      "get": {
+        "tags": ["Clientes PJ"],
+        "summary": "Extrato do cliente PJ",
+        "description": "Retorna o histórico paginado de transações do cliente PJ.",
+        "operationId": "statementBusinessClient",
+        "parameters": [
+          { "$ref": "#/components/parameters/clientId" },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["withdrawal", "deposit"]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date", "example": "2026-01-01" }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": { "type": "string", "format": "date", "example": "2026-12-31" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Extrato retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatementPage" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "tags": ["Configurações"],
+        "summary": "Obter configurações ativas",
+        "description": "Retorna as configurações atuais de idioma, formato de moeda e formato de data.",
+        "operationId": "getSettings",
+        "responses": {
+          "200": {
+            "description": "Configurações retornadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Settings" },
+                "example": {
+                  "id": 1,
+                  "language": "pt",
+                  "currencyFormat": "BRL",
+                  "dateFormat": "DD/MM/YYYY",
+                  "active": true,
+                  "createdAt": "2026-04-06 00:53:11",
+                  "updatedAt": "2026-04-06 01:55:14"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Configurações"],
+        "summary": "Atualizar configurações",
+        "description": "Atualiza uma ou mais configurações do sistema. Todos os campos são opcionais.",
+        "operationId": "updateSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateSettingsRequest" },
+              "examples": {
+                "setEnglish": {
+                  "summary": "Alterar para inglês com dólar",
+                  "value": {
+                    "language": "en",
+                    "currencyFormat": "USD",
+                    "dateFormat": "MM/DD/YYYY"
+                  }
+                },
+                "setPortuguese": {
+                  "summary": "Restaurar para português com real",
+                  "value": {
+                    "language": "pt",
+                    "currencyFormat": "BRL",
+                    "dateFormat": "DD/MM/YYYY"
+                  }
+                },
+                "setEuro": {
+                  "summary": "Alterar apenas a moeda para euro",
+                  "value": {
+                    "currencyFormat": "EUR"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configurações atualizadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Settings" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/exports/individual-clients/pdf": {
+      "get": {
+        "tags": ["Exportações"],
+        "summary": "Exportar clientes PF em PDF",
+        "description": "Gera e retorna um arquivo PDF com a listagem de clientes PF. Suporta os mesmos filtros do endpoint de listagem.",
+        "operationId": "exportIndividualClientsPdf",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["standard", "premium", "vip"] }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF gerado com sucesso",
+            "content": {
+              "application/pdf": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": { "type": "string" },
+                "example": "attachment; filename=\"clientes-pf.pdf\""
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exports/individual-clients/csv": {
+      "get": {
+        "tags": ["Exportações"],
+        "summary": "Exportar clientes PF em CSV",
+        "description": "Gera e retorna um arquivo CSV com a listagem de clientes PF. Suporta os mesmos filtros do endpoint de listagem.",
+        "operationId": "exportIndividualClientsCsv",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["standard", "premium", "vip"] }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV gerado com sucesso",
+            "content": {
+              "text/csv": {
+                "schema": { "type": "string" },
+                "example": "ID,Nome Completo,Idade,Renda Mensal,Telefone,Email,Categoria,Saldo,Criado em\n1,Ana Paula Silva,32,5000,11999991111,ana.paula@email.com,premium,14500,06/04/2026"
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "schema": { "type": "string" },
+                "example": "attachment; filename=\"clientes-pf.csv\""
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exports/business-clients/pdf": {
+      "get": {
+        "tags": ["Exportações"],
+        "summary": "Exportar clientes PJ em PDF",
+        "description": "Gera e retorna um arquivo PDF com a listagem de clientes PJ. Suporta os mesmos filtros do endpoint de listagem.",
+        "operationId": "exportBusinessClientsPdf",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "cnpj",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["standard", "corporate", "enterprise"] }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF gerado com sucesso",
+            "content": {
+              "application/pdf": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exports/business-clients/csv": {
+      "get": {
+        "tags": ["Exportações"],
+        "summary": "Exportar clientes PJ em CSV",
+        "description": "Gera e retorna um arquivo CSV com a listagem de clientes PJ. Suporta os mesmos filtros do endpoint de listagem.",
+        "operationId": "exportBusinessClientsCsv",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "cnpj",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["standard", "corporate", "enterprise"] }
+          },
+          {
+            "name": "minBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxBalance",
+            "in": "query",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV gerado com sucesso",
+            "content": {
+              "text/csv": {
+                "schema": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "clientId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "ID numérico do cliente",
+        "schema": { "type": "integer", "example": 1 }
+      }
+    },
+    "schemas": {
+      "IndividualClient": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "fullName": { "type": "string", "example": "Ana Paula Silva" },
+          "monthlyIncome": { "type": "number", "format": "float", "example": 5000 },
+          "age": { "type": "integer", "example": 32 },
+          "phone": { "type": "string", "example": "11999991111" },
+          "email": { "type": "string", "format": "email", "example": "ana.paula@email.com" },
+          "category": {
+            "type": "string",
+            "enum": ["standard", "premium", "vip"],
+            "example": "premium"
+          },
+          "balance": { "type": "number", "format": "float", "example": 14500 },
+          "createdAt": { "type": "string", "example": "2026-04-06 00:53:56" },
+          "updatedAt": { "type": "string", "example": "2026-04-06 00:55:11" }
+        }
+      },
+      "CreateIndividualClientRequest": {
+        "type": "object",
+        "required": ["fullName", "age", "monthlyIncome"],
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "minLength": 2,
+            "example": "João da Silva",
+            "description": "Nome completo (mínimo 2 caracteres)"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120,
+            "example": 35,
+            "description": "Idade em anos"
+          },
+          "monthlyIncome": {
+            "type": "number",
+            "minimum": 0,
+            "example": 8000,
+            "description": "Renda mensal em reais"
+          },
+          "phone": {
+            "type": "string",
+            "example": "11988887777",
+            "description": "Telefone (opcional)"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "joao@email.com",
+            "description": "E-mail válido (opcional)"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["standard", "premium", "vip"],
+            "default": "standard",
+            "example": "premium"
+          },
+          "balance": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0,
+            "example": 5000,
+            "description": "Saldo inicial da conta"
+          }
+        }
+      },
+      "UpdateIndividualClientRequest": {
+        "type": "object",
+        "properties": {
+          "fullName": { "type": "string", "minLength": 2, "example": "João da Silva" },
+          "age": { "type": "integer", "minimum": 1, "maximum": 120, "example": 36 },
+          "monthlyIncome": { "type": "number", "minimum": 0, "example": 9000 },
+          "phone": { "type": "string", "example": "11911112222" },
+          "email": { "type": "string", "format": "email", "example": "joao.novo@email.com" },
+          "category": { "type": "string", "enum": ["standard", "premium", "vip"], "example": "vip" },
+          "balance": { "type": "number", "minimum": 0, "example": 6000 }
+        }
+      },
+      "IndividualClientPage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/IndividualClient" }
+          },
+          "total": { "type": "integer", "example": 35 },
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 10 },
+          "totalPages": { "type": "integer", "example": 4 }
+        }
+      },
+      "BusinessClient": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "companyName": { "type": "string", "example": "Tech Solutions Ltda" },
+          "tradeName": { "type": "string", "example": "TechSol" },
+          "cnpj": { "type": "string", "example": "11.222.333/0001-44" },
+          "phone": { "type": "string", "example": "1133334444" },
+          "email": { "type": "string", "format": "email", "example": "contato@techsol.com.br" },
+          "category": {
+            "type": "string",
+            "enum": ["standard", "corporate", "enterprise"],
+            "example": "corporate"
+          },
+          "balance": { "type": "number", "format": "float", "example": 150000 },
+          "createdAt": { "type": "string", "example": "2026-04-06 00:53:56" },
+          "updatedAt": { "type": "string", "example": "2026-04-06 00:53:56" }
+        }
+      },
+      "CreateBusinessClientRequest": {
+        "type": "object",
+        "required": ["companyName", "tradeName", "cnpj"],
+        "properties": {
+          "companyName": {
+            "type": "string",
+            "minLength": 2,
+            "example": "Inovação Digital Ltda",
+            "description": "Razão social (mínimo 2 caracteres)"
+          },
+          "tradeName": {
+            "type": "string",
+            "minLength": 1,
+            "example": "InovaDigital",
+            "description": "Nome fantasia"
+          },
+          "cnpj": {
+            "type": "string",
+            "minLength": 14,
+            "maxLength": 18,
+            "example": "22.333.444/0001-55",
+            "description": "CNPJ com ou sem formatação (único no sistema)"
+          },
+          "phone": { "type": "string", "example": "1144445555" },
+          "email": { "type": "string", "format": "email", "example": "contato@inovadigital.com.br" },
+          "category": {
+            "type": "string",
+            "enum": ["standard", "corporate", "enterprise"],
+            "default": "standard",
+            "example": "enterprise"
+          },
+          "balance": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0,
+            "example": 100000,
+            "description": "Saldo inicial da conta"
+          }
+        }
+      },
+      "UpdateBusinessClientRequest": {
+        "type": "object",
+        "properties": {
+          "companyName": { "type": "string", "minLength": 2 },
+          "tradeName": { "type": "string", "minLength": 1 },
+          "cnpj": { "type": "string", "minLength": 14, "maxLength": 18 },
+          "phone": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "category": { "type": "string", "enum": ["standard", "corporate", "enterprise"] },
+          "balance": { "type": "number", "minimum": 0 }
+        }
+      },
+      "BusinessClientPage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BusinessClient" }
+          },
+          "total": { "type": "integer", "example": 9 },
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 10 },
+          "totalPages": { "type": "integer", "example": 1 }
+        }
+      },
+      "WithdrawRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "minimum": 0.01,
+            "example": 500,
+            "description": "Valor a sacar. PF: máximo R$ 1.000,00. PJ: máximo R$ 5.000,00."
+          },
+          "description": {
+            "type": "string",
+            "default": "Saque",
+            "example": "Saque em dinheiro",
+            "description": "Descrição opcional da operação"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 42 },
+          "clientId": { "type": "integer", "example": 1 },
+          "clientType": {
+            "type": "string",
+            "enum": ["individual", "business"],
+            "example": "individual"
+          },
+          "transactionType": {
+            "type": "string",
+            "enum": ["withdrawal", "deposit"],
+            "example": "withdrawal"
+          },
+          "amount": { "type": "number", "example": 500 },
+          "description": { "type": "string", "example": "Saque em dinheiro" },
+          "previousBalance": { "type": "number", "example": 14500 },
+          "newBalance": { "type": "number", "example": 14000 },
+          "createdAt": { "type": "string", "example": "2026-04-06 12:30:00" }
+        }
+      },
+      "WithdrawResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "transaction": { "$ref": "#/components/schemas/Transaction" },
+          "newBalance": { "type": "number", "example": 14000 }
+        }
+      },
+      "StatementPage": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Transaction" }
+          },
+          "currentBalance": { "type": "number", "example": 14500 },
+          "total": { "type": "integer", "example": 7 },
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 10 },
+          "totalPages": { "type": "integer", "example": 1 }
+        }
+      },
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "language": {
+            "type": "string",
+            "enum": ["pt", "en"],
+            "example": "pt",
+            "description": "Idioma da interface"
+          },
+          "currencyFormat": {
+            "type": "string",
+            "enum": ["BRL", "USD", "EUR"],
+            "example": "BRL",
+            "description": "Formato de moeda"
+          },
+          "dateFormat": {
+            "type": "string",
+            "enum": ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"],
+            "example": "DD/MM/YYYY",
+            "description": "Formato de data"
+          },
+          "active": { "type": "boolean", "example": true },
+          "createdAt": { "type": "string", "example": "2026-04-06 00:53:11" },
+          "updatedAt": { "type": "string", "example": "2026-04-06 01:55:14" }
+        }
+      },
+      "UpdateSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": ["pt", "en"],
+            "example": "pt",
+            "description": "Idioma da interface"
+          },
+          "currencyFormat": {
+            "type": "string",
+            "enum": ["BRL", "USD", "EUR"],
+            "example": "BRL",
+            "description": "Formato de moeda"
+          },
+          "dateFormat": {
+            "type": "string",
+            "enum": ["DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"],
+            "example": "DD/MM/YYYY",
+            "description": "Formato de data"
+          }
+        }
+      },
+      "SuccessMessage": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operação realizada com sucesso" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "example": "Mensagem de erro" }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "example": "Validation Error" },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string", "example": "fullName" },
+                "message": { "type": "string", "example": "Nome completo é obrigatório" }
+              }
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "example": "Cliente não encontrado" },
+          "statusCode": { "type": "integer", "example": 404 }
+        }
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "Recurso não encontrado",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/NotFoundError" },
+            "example": {
+              "error": "Cliente não encontrado",
+              "statusCode": 404
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Erro de validação nos dados enviados",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationError" },
+            "example": {
+              "error": "Validation Error",
+              "errors": [
+                { "field": "fullName", "message": "Nome completo é obrigatório" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
