@@ -105,6 +105,30 @@ Registro cronológico de todas as solicitações enviadas ao agente durante o de
 
 ---
 
+## Prompt 06 — Frontend React + Vite
+
+**Solicitação (continuação de sessão anterior — resumo da instrução original):**
+
+> (Retomada de sessão com contexto do projeto)  
+> Construir o frontend React + Vite para o Sistema Bancário, consumindo a API REST do backend Express existente (`artifacts/banking-system`, porta 3000). O frontend deve ter: dashboard com KPIs, CRUD completo de clientes PF/PJ, formulários com validação em português, saque com limites por tipo, extrato com filtros de data/tipo, exportação PDF/CSV e página de configurações com troca de idioma PT/EN.
+
+**Resultado entregue:**
+
+- **Artifact criado:** `banking-frontend` (`artifacts/banking-frontend/`) — React + Vite + shadcn/ui + TanStack Query, servido em `/banking-frontend/` (porta 19234)
+- **`src/services/api.ts`**: cliente fetch tipado cobrindo os 20 endpoints da API bancária
+- **`src/hooks/`**: hooks TanStack Query para PF, PJ e configurações (queries + mutations com invalidação automática)
+- **`src/context/SettingsContext.tsx`**: contexto global de configurações e i18n
+- **`src/i18n/translations.ts`**: traduções completas PT e EN para toda a interface
+- **`src/utils/formatters.ts`**: `formatCurrency()` e `formatDate()` respeitando as preferências do usuário
+- **`src/components/Layout.tsx`**: sidebar de navegação com modo desktop e hamburger menu mobile
+- **11 páginas implementadas**: Dashboard, Lista PF/PJ, Novo Cliente, Detalhe PF, Detalhe PJ, Edição PF, Edição PJ, Saque PF, Saque PJ, Extrato, Configurações
+- **Correção de roteamento**: adicionado `/api/` aos paths do `artifact.toml` para que o proxy reverso do Replit encaminhe as chamadas de API para o Vite (que faz proxy para porta 3000)
+- **`vite.config.ts`**: proxy `/api → localhost:3000` + `resolve.dedupe` para evitar múltiplas instâncias React
+- **Testes E2E aprovados**: dashboard com dados reais, navegação, busca/filtro PF e PJ, detalhe de cliente, aba PJ com CNPJ formatado, configurações, formulário de criação
+- **`.docs/changes-log.md`**: criado registro completo de alterações do projeto
+
+---
+
 ## Sumário
 
 | # | Prompt | Arquivos gerados / modificados |
@@ -114,3 +138,4 @@ Registro cronológico de todas as solicitações enviadas ao agente durante o de
 | 03 | README + PRD + registro de erros | `README.md`, `.docs/project.prd`, `.docs/errors-fixed.md` |
 | 04 | OpenAPI para Postman | `openapi.json` |
 | 05 | Registro de prompts | `docs/prompts.md` |
+| 06 | Frontend React + Vite | `artifacts/banking-frontend/src/**`, `vite.config.ts`, `artifact.toml`, `.docs/changes-log.md` |
