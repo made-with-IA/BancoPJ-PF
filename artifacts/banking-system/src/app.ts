@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import methodOverride from 'method-override';
+import ejs from 'ejs';
 import { initializeDatabase } from './database/init';
 import { settingsMiddleware } from './middlewares/settingsMiddleware';
 import { errorHandler } from './middlewares/errorHandler';
@@ -11,8 +12,18 @@ initializeDatabase();
 
 const app = express();
 
+const viewsDir = path.join(__dirname, 'views');
+
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', viewsDir);
+
+// Register EJS engine with explicit opts to prevent EJS from treating template
+// locals named 'client', 'scope', 'strict', etc. as EJS compilation options.
+// Without this, passing a truthy `client` local would trigger EJS client-mode
+// and make include() unavailable in the template.
+app.engine('ejs', (filePath: string, data: object, cb: (err: Error | null, rendered?: string) => void) => {
+  ejs.renderFile(filePath, data as Record<string, unknown>, { views: [viewsDir] }, cb);
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

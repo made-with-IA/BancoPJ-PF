@@ -8,6 +8,7 @@ module.exports = {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: {
         module: 'CommonJS',
+        moduleResolution: 'Node',
         target: 'ES2022',
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,

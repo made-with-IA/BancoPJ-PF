@@ -100,7 +100,7 @@ export class BusinessClientController {
   // GET /clientes/pj/:id
   show = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
@@ -130,7 +130,7 @@ export class BusinessClientController {
   // GET /clientes/pj/:id/editar
   editForm = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
@@ -150,7 +150,7 @@ export class BusinessClientController {
   // POST /clientes/pj/:id/editar
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const parsed = updateBusinessClientSchema.safeParse(req.body);
       if (!parsed.success) {
         const client = this.service.getClient(id);
@@ -175,7 +175,7 @@ export class BusinessClientController {
   // POST /clientes/pj/:id/excluir
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const deleted = this.service.deleteClient(id);
       if (!deleted) throw new NotFoundError('Cliente não encontrado');
       res.redirect(`/clientes/pj?flash=${encodeURIComponent(res.locals.t('clientDeleted'))}&flashType=success`);
@@ -187,7 +187,7 @@ export class BusinessClientController {
   // GET /clientes/pj/:id/extrato
   statement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
@@ -237,7 +237,7 @@ export class BusinessClientController {
   // POST /clientes/pj/:id/saque (web form)
   webWithdraw = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const parsed = withdrawalSchema.safeParse(req.body);
       if (!parsed.success) {
         const errs = formatZodErrors(parsed.error);
@@ -249,7 +249,7 @@ export class BusinessClientController {
       res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(res.locals.t('withdrawalSuccess'))}&flashType=success`);
     } catch (err) {
       if (err instanceof AppError) {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(err.message)}&flashType=error`);
         return;
       }
@@ -287,7 +287,7 @@ export class BusinessClientController {
 
   apiGet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
       res.json(client);
@@ -298,7 +298,7 @@ export class BusinessClientController {
 
   apiUpdate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const parsed = updateBusinessClientSchema.safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json({ error: 'Validation Error', errors: formatZodErrors(parsed.error) });
@@ -314,7 +314,7 @@ export class BusinessClientController {
 
   apiDelete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const deleted = this.service.deleteClient(id);
       if (!deleted) throw new NotFoundError('Cliente não encontrado');
       res.json({ success: true, message: 'Cliente excluído com sucesso' });
@@ -325,7 +325,7 @@ export class BusinessClientController {
 
   apiWithdraw = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const parsed = withdrawalSchema.safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json({ error: 'Validation Error', errors: formatZodErrors(parsed.error) });
@@ -341,7 +341,7 @@ export class BusinessClientController {
 
   apiStatement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id as string);
       const page = parseInt(req.query.page as string) || 1;
       const filters = {
         transactionType: (req.query.transactionType as string) || undefined,
