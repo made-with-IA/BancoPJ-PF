@@ -6,3 +6,9 @@ id = "8s4YvQXhnHQbmmGDrhAMu"
 uri = "file://artifacts/banking-system/openapi.json"
 type = "unspecified"
 title = "openapi.json — Sistema Bancário"
+
+[[outputs]]
+id = "A2Y3hLHbkbC5s5Mpr1--b"
+uri = "file://artifacts/banking-system/docs/prompts.md"
+type = "text"
+title = "docs/prompts.md — Registro de Solicitações"
