@@ -82,7 +82,7 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Users size={16} className="text-primary" />
-              Últimos Clientes PF
+              {t.dashboard.recentPF}
             </CardTitle>
             <Link href="/clientes">
               <Button variant="ghost" size="sm" className="text-xs" data-testid="link-view-all-pf">
@@ -125,7 +125,7 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Building2 size={16} className="text-purple-600" />
-              Últimos Clientes PJ
+              {t.dashboard.recentPJ}
             </CardTitle>
             <Link href="/clientes">
               <Button variant="ghost" size="sm" className="text-xs" data-testid="link-view-all-pj">

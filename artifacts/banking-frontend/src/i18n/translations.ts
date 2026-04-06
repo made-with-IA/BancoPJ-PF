@@ -18,6 +18,8 @@ export const translations = {
       balancePJ: "Saldo Total PJ",
       newClient: "Novo Cliente",
       viewAll: "Ver Todos",
+      recentPF: "Últimos Clientes PF",
+      recentPJ: "Últimos Clientes PJ",
     },
     clients: {
       title: "Clientes",
@@ -156,6 +158,8 @@ export const translations = {
       balancePJ: "Total Balance (Bus.)",
       newClient: "New Client",
       viewAll: "View All",
+      recentPF: "Recent Individual Clients",
+      recentPJ: "Recent Business Clients",
     },
     clients: {
       title: "Clients",
