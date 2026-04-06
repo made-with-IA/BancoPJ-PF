@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="main-content">
+    <div class="page-header">
+      <h1>🏢 <%= client.companyName %></h1>
+      <div class="page-actions">
+        <a href="/clientes/business/<%= client.id %>/editar" class="btn btn-warning"><%= translations.edit %></a>
+        <a href="/clientes/business/<%= client.id %>/extrato" class="btn btn-blue"><%= translations.statement %></a>
+        <form method="POST" action="/clientes/business/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
+          <button type="submit" class="btn btn-danger"><%= translations.delete %></button>
+        </form>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="row">
+      <div class="col-two-thirds">
+        <div class="card">
+          <div class="card-header"><h2>Dados da Empresa</h2></div>
+          <div class="card-body">
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.companyName %></span>
+                <span class="detail-value"><%= client.companyName %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.tradeName %></span>
+                <span class="detail-value"><%= client.tradeName %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.cnpj %></span>
+                <span class="detail-value"><code><%= client.cnpj %></code></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.email %></span>
+                <span class="detail-value"><%= client.email || '-' %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.phone %></span>
+                <span class="detail-value"><%= client.phone || '-' %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label"><%= translations.category %></span>
+                <span class="detail-value"><span class="badge badge-<%= client.category %>"><%= translations[client.category] || client.category %></span></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Cadastrado em</span>
+                <span class="detail-value"><%= client.formattedCreatedAt %></span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Atualizado em</span>
+                <span class="detail-value"><%= client.formattedUpdatedAt %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-third">
+        <div class="card balance-card">
+          <div class="card-header"><h2><%= translations.balance %></h2></div>
+          <div class="card-body center">
+            <div class="balance-amount"><%= client.formattedBalance %></div>
+            <div class="balance-limit">Limite de saque: <strong><%= formattedMaxWithdrawal %></strong></div>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header"><h2>💸 <%= translations.withdraw %></h2></div>
+          <div class="card-body">
+            <form method="POST" action="/clientes/business/<%= client.id %>/saque">
+              <div class="form-group">
+                <label class="form-label"><%= translations.amount %></label>
+                <input type="number" name="amount" step="0.01" min="0.01" max="<%= maxWithdrawal %>" class="form-control" placeholder="0.00" required />
+              </div>
+              <button type="submit" class="btn btn-primary full-width"><%= translations.withdraw %></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p></footer>
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>

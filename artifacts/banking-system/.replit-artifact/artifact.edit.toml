@@ -1,0 +1,10 @@
+id = "banking-system"
+artifactType = "webview"
+title = "Sistema Bancário"
+slug = "banking-system"
+previewPath = "/"
+
+[[services]]
+name = "web"
+port = 3000
+devCommand = "pnpm --filter @workspace/banking-system run dev"

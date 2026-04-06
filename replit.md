@@ -2,7 +2,7 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+pnpm workspace monorepo using TypeScript. Contains a complete banking system (Sistema Bancário) in Portuguese.
 
 ## Stack
 
@@ -11,17 +11,30 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Database**: SQLite via better-sqlite3 (file: `artifacts/banking-system/banking.db`)
+- **Template engine**: EJS (server-rendered, no React/Vite)
+- **Testing**: Jest + Supertest (23 tests, 3 suites)
 
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm --filter @workspace/banking-system run dev` — run banking system (port 3000)
+- `pnpm --filter @workspace/banking-system run test` — run all tests
+- `pnpm --filter @workspace/banking-system run db:seed` — seed sample data
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+## Banking System Features
+
+- **Pessoa Física** (Individual clients): CRUD, withdrawal limit R$1,000
+- **Pessoa Jurídica** (Business clients): CRUD, withdrawal limit R$5,000
+- Account statements with transaction history
+- PDF and CSV export
+- Settings: language (PT/EN), currency format, date format
+- Pagination and search filters
+- All UI in Portuguese with EN toggle
+
+## Package Dependencies Note
+
+- `better-sqlite3` requires Python3 to compile. Python3 must be installed as a system dependency.
+- If `pnpm install` fails for `better-sqlite3`, run: install `python3` via system dependencies first.
+
+See the `pnpm-workspace` skill for workspace structure and TypeScript setup.

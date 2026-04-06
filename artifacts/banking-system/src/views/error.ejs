@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Erro | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><a href="/">🏦 SistemaBanco</a></div>
+    <ul class="nav-links">
+      <li><a href="/">Dashboard</a></li>
+      <li><a href="/clientes/individual">Pessoa Física</a></li>
+      <li><a href="/clientes/business">Pessoa Jurídica</a></li>
+      <li><a href="/configuracoes">Configurações</a></li>
+    </ul>
+  </nav>
+  <main class="main-content">
+    <div class="page-header">
+      <h1><%= title || 'Erro' %></h1>
+    </div>
+    <div class="card">
+      <div class="alert alert-error">
+        <p><%= message %></p>
+      </div>
+      <% if (locals.errors && errors.length > 0) { %>
+        <ul class="error-list">
+          <% errors.forEach(function(err) { %>
+            <li><%= err.message || err %></li>
+          <% }) %>
+        </ul>
+      <% } %>
+      <a href="/" class="btn btn-primary mt-3">Voltar ao Dashboard</a>
+    </div>
+  </main>
+</body>
+</html>

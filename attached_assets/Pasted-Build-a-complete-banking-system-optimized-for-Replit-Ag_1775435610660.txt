@@ -1,0 +1,434 @@
+Build a complete banking system optimized for Replit Agent.
+
+This is a full-stack web application with server-rendered pages and SQLite persistence.
+
+Critical rules:
+- All source code must be written in English.
+- All user-facing interface text must be written in Brazilian Portuguese.
+- Default interface language must be Portuguese.
+- Settings must allow switching between Portuguese and English.
+- Settings must also allow configuring currency format and date format.
+- The project must be easy to run inside Replit with minimal setup.
+- Use a simple, maintainable architecture. Do not overengineer.
+
+# Main Objective
+Create a banking system with support for Individual Clients and Business Clients, following MVC architecture, SQLite integration, business rules for withdrawals, unit tests for controllers, pagination, filters, edit/delete features, export to PDF and CSV, and a Portuguese-first interface.
+
+# Technical Stack
+Use:
+- Node.js
+- TypeScript
+- Express
+- SQLite
+- EJS for server-rendered views
+- Jest
+- Supertest
+- PDFKit
+- csv-writer or equivalent
+- Zod or class-validator for validation
+
+Avoid unnecessary complexity.
+Do not use a separate SPA frontend unless absolutely necessary.
+Prefer a monolithic Express + EJS application because it is more stable for Replit.
+
+# Architecture Requirements
+Use MVC and separate responsibilities clearly.
+
+Required folders:
+- src/models
+- src/interfaces
+- src/repositories
+- src/services
+- src/controllers
+- src/routes
+- src/views
+- src/database
+- src/config
+- src/utils
+- src/middlewares
+- tests
+
+Rules:
+- Controllers must only handle request/response orchestration.
+- Services must contain business rules.
+- Repositories must encapsulate SQLite queries.
+- Views must contain only presentation logic.
+- Validation must be centralized.
+- Error handling must be centralized.
+
+# Domain Requirements
+
+## Client Types
+Support two client types:
+1. Individual Client
+2. Business Client
+
+## Client Interface
+Create a Client interface with:
+- withdrawMoney(amount: number): Promise<any>
+- getStatement(filters?: any): Promise<any>
+
+Both IndividualClient and BusinessClient must implement this interface.
+
+# Required Entities
+
+## IndividualClient
+Fields:
+- id
+- fullName
+- monthlyIncome
+- age
+- phone
+- email
+- category
+- balance
+- createdAt
+- updatedAt
+
+## BusinessClient
+Fields:
+- id
+- companyName
+- tradeName
+- cnpj
+- phone
+- email
+- category
+- balance
+- createdAt
+- updatedAt
+
+## Transaction
+Fields:
+- id
+- clientId
+- clientType
+- transactionType
+- amount
+- description
+- previousBalance
+- newBalance
+- createdAt
+
+## Settings
+Fields:
+- id
+- language
+- currencyFormat
+- dateFormat
+- active
+- createdAt
+- updatedAt
+
+# Business Rules
+Implement the following mandatory rules:
+
+1. Withdrawal must validate:
+   - amount must be greater than zero
+   - client must exist
+   - sufficient balance is required
+   - withdrawal amount must not exceed the maximum allowed for that client type
+
+2. Withdrawal limits must be different:
+   - Individual Client maximum withdrawal must be lower than Business Client maximum withdrawal
+
+Use configurable constants such as:
+- Individual Client max withdrawal: 1000
+- Business Client max withdrawal: 5000
+
+3. Every successful withdrawal must create a transaction record.
+
+4. Statement must display:
+   - transaction history
+   - current balance
+   - dates formatted according to settings
+   - currency formatted according to settings
+
+5. User-facing messages must be in Portuguese by default.
+
+6. Language, currency, and date settings must affect rendered pages and exported reports.
+
+# Database Requirements
+The application must use SQLite.
+
+Use the following SQL as the basis for the Individual Client structure:
+
+CREATE TABLE IF NOT EXISTS pessoa_fisica (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    renda_mensal REAL,
+    idade INTEGER,
+    nome_completo TEXT,
+    celular TEXT,
+    email TEXT,
+    categoria TEXT,
+    saldo REAL
+);
+
+Based on this requirement, create a proper SQLite schema for the full application.
+
+Required tables:
+- individual_clients
+- business_clients
+- transactions
+- settings
+
+You may keep internal table names in English, but document the mapping from the original requirement.
+
+Also create:
+- database initialization script
+- migration or setup script
+- optional seed script with sample data
+
+# Required Features
+
+## Client Management
+Implement full CRUD for both client types:
+- create
+- list
+- show details
+- edit
+- delete
+
+## Withdrawals
+Implement withdrawals for both client types.
+
+## Statement
+Implement statement retrieval and statement page.
+
+## Settings
+Implement a settings page where the user can configure:
+- interface language
+- currency format
+- date format
+
+Default:
+- language = Portuguese
+
+## Listing Requirements
+All listing pages must include:
+- pagination
+- filters
+- edit action
+- delete action
+- export to PDF
+- export to CSV
+
+Suggested filters:
+- client type
+- name
+- email
+- category
+- minimum balance
+- maximum balance
+
+Include pagination metadata in API responses:
+- data
+- total
+- page
+- limit
+- totalPages
+
+# UI Requirements
+Build a simple, clean, practical interface optimized for Replit.
+
+The interface must be server-rendered and shown in Portuguese by default.
+
+Required pages:
+- Dashboard
+- Lista de Clientes
+- Novo Cliente
+- Editar Cliente
+- Detalhes do Cliente
+- Extrato
+- Configurações
+
+Required UI characteristics:
+- simple navigation menu
+- clear Portuguese labels
+- forms with validation feedback in Portuguese
+- pagination controls
+- filters section
+- action buttons for editar, excluir, exportar PDF, exportar CSV
+- clean responsive layout
+- no unnecessary visual complexity
+
+Suggested Portuguese labels:
+- Dashboard
+- Clientes
+- Novo Cliente
+- Editar
+- Excluir
+- Salvar
+- Cancelar
+- Extrato
+- Configurações
+- Exportar PDF
+- Exportar CSV
+- Página anterior
+- Próxima página
+
+# Routing Requirements
+
+## Web Routes
+Create server-rendered routes for:
+- /
+- /clientes
+- /clientes/novo
+- /clientes/:type/:id
+- /clientes/:type/:id/editar
+- /clientes/:type/:id/extrato
+- /configuracoes
+
+## API Routes
+Create REST endpoints for:
+- /api/individual-clients
+- /api/business-clients
+- /api/settings
+- /api/individual-clients/:id/withdraw
+- /api/business-clients/:id/withdraw
+- /api/individual-clients/:id/statement
+- /api/business-clients/:id/statement
+- /api/exports/individual-clients/csv
+- /api/exports/individual-clients/pdf
+- /api/exports/business-clients/csv
+- /api/exports/business-clients/pdf
+
+# Validation Rules
+Validate all input data.
+
+Examples:
+- full name required for individual client
+- age must be a valid positive integer
+- monthly income must be non-negative
+- email must be valid
+- balance must be non-negative
+- cnpj required for business client
+- company name required for business client
+- withdrawal amount must be positive
+
+Return clear validation messages in Portuguese for UI and structured messages for API.
+
+# Error Handling
+Create centralized error handling with:
+- domain errors
+- validation errors
+- not found errors
+- database errors
+
+Use proper HTTP status codes.
+Show friendly messages in Portuguese on pages.
+
+# Exports
+Implement export features for client listings:
+- CSV export
+- PDF export
+
+Exports must respect filters when possible.
+PDF must contain a readable report title in Portuguese.
+CSV must contain clear column headers.
+
+# Testing Requirements
+Create unit tests for controllers using Jest and Supertest.
+
+Minimum coverage:
+- successful creation of individual client
+- successful creation of business client
+- listing with pagination
+- filtering
+- update
+- delete
+- valid withdrawal for individual client
+- valid withdrawal for business client
+- insufficient balance error
+- withdrawal above individual limit
+- withdrawal above business limit
+- statement retrieval
+- settings update
+
+If possible, also add basic integration tests.
+
+# Replit-Specific Requirements
+Make this project work well in Replit.
+
+Include:
+- package.json scripts
+- npm run dev
+- npm run build
+- npm run start
+- npm test
+
+Keep environment configuration minimal.
+Do not depend on external services.
+Make local SQLite file persistence simple.
+
+# File Generation Requirements
+Generate all real project files, not just explanations.
+
+At minimum include:
+1. package.json
+2. tsconfig.json
+3. src/app.ts
+4. src/server.ts
+5. database connection setup
+6. SQL initialization scripts
+7. all models
+8. all interfaces
+9. all repositories
+10. all services
+11. all controllers
+12. all routes
+13. all EJS views
+14. tests
+15. seed data
+16. README.md
+
+# README Requirements
+The README must include:
+- project overview
+- chosen stack
+- architecture explanation
+- how to run in Replit
+- how to run locally
+- how to run tests
+- environment notes
+- route list
+- sample API requests
+- explanation of language/currency/date settings
+
+# Coding Style
+- Use consistent English naming in code
+- Use TypeScript types properly
+- Keep functions focused
+- Avoid duplicated logic
+- Use reusable utilities for formatting date/currency
+- Keep UI text separated when helpful for future i18n
+- Add comments only where they help understanding
+
+# Acceptance Criteria
+The project will only be considered complete if:
+- it runs in Replit without major setup friction
+- SQLite is actually connected and working
+- both client types work
+- both client types implement the Client interface
+- withdrawal limits are different and enforced
+- all CRUD operations work
+- statement works
+- settings work
+- pagination works
+- filters work
+- edit/delete work
+- CSV export works
+- PDF export works
+- controllers have unit tests
+- UI is in Portuguese by default
+- code is in English
+
+# Final Output Format
+Do not provide only a summary.
+Generate the project files.
+
+At the end, include:
+- final project tree
+- explanation of how to run in Replit
+- test commands
+- brief summary of architectural decisions

@@ -1,0 +1,19 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <a href="/">🏦 SistemaBanco</a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/" class="<%= locals.path === '/' ? 'active' : '' %>"><%= translations.dashboard %></a></li>
+    <li>
+      <span class="nav-separator">|</span>
+      <a href="/clientes/individual" class="<%= (locals.path || '').includes('/clientes/individual') ? 'active' : '' %>">🧑 <%= translations.individualClient %></a>
+    </li>
+    <li>
+      <a href="/clientes/business" class="<%= (locals.path || '').includes('/clientes/business') ? 'active' : '' %>">🏢 <%= translations.businessClient %></a>
+    </li>
+    <li>
+      <span class="nav-separator">|</span>
+      <a href="/configuracoes" class="<%= locals.path === '/configuracoes' ? 'active' : '' %>">⚙️ <%= translations.settings %></a>
+    </li>
+  </ul>
+</nav>

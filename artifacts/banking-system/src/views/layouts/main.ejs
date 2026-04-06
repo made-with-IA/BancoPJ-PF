@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <a href="/">🏦 SistemaBanco</a>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/" class="<%= locals.path === '/' ? 'active' : '' %>"><%= translations.dashboard %></a></li>
+      <li class="nav-dropdown">
+        <span class="nav-dropdown-toggle"><%= translations.clients %> ▾</span>
+        <ul class="nav-dropdown-menu">
+          <li><a href="/clientes/individual"><%= translations.individualClient %></a></li>
+          <li><a href="/clientes/business"><%= translations.businessClient %></a></li>
+        </ul>
+      </li>
+      <li><a href="/configuracoes" class="<%= locals.path === '/configuracoes' ? 'active' : '' %>"><%= translations.settings %></a></li>
+    </ul>
+  </nav>
+
+  <main class="main-content">
+    <%- body %>
+  </main>
+
+  <footer class="footer">
+    <p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p>
+  </footer>
+
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>

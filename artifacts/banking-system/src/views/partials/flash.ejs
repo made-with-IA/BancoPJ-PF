@@ -1,0 +1,6 @@
+<% if (locals.flash) { %>
+  <div class="alert alert-<%= locals.flashType || 'success' %>">
+    <span><%= locals.flash %></span>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% } %>

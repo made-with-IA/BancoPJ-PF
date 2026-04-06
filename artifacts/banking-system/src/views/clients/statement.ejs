@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="main-content">
+    <div class="page-header">
+      <h1>📋 <%= translations.statement %></h1>
+      <a href="/clientes/<%= clientType %>/<%= client.id %>" class="btn btn-outline">← Voltar</a>
+    </div>
+
+    <div class="stat-card stat-green mb-4">
+      <div class="stat-icon">💰</div>
+      <div class="stat-body">
+        <div class="stat-value"><%= currentBalance %></div>
+        <div class="stat-label"><%= translations.currentBalance %> - <%= client.fullName || client.companyName || client.name %></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card filter-card mb-3">
+      <form method="GET" action="/clientes/<%= clientType %>/<%= client.id %>/extrato" class="filter-form">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label><%= translations.transactionType %></label>
+            <select name="transactionType" class="form-control">
+              <option value="">Todos</option>
+              <option value="deposit" <%= filters.transactionType === 'deposit' ? 'selected' : '' %>><%= translations.deposit %></option>
+              <option value="withdrawal" <%= filters.transactionType === 'withdrawal' ? 'selected' : '' %>><%= translations.withdrawal %></option>
+              <option value="transfer" <%= filters.transactionType === 'transfer' ? 'selected' : '' %>><%= translations.transfer %></option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><%= translations.startDate %></label>
+            <input type="date" name="startDate" value="<%= filters.startDate || '' %>" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><%= translations.endDate %></label>
+            <input type="date" name="endDate" value="<%= filters.endDate || '' %>" class="form-control" />
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary"><%= translations.filter %></button>
+          <a href="/clientes/<%= clientType %>/<%= client.id %>/extrato" class="btn btn-outline"><%= translations.clearFilters %></a>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2><%= translations.transactionHistory %></h2>
+        <span class="badge-count"><%= pagination.total %> registros</span>
+      </div>
+      <div class="card-body">
+        <% if (transactions.length === 0) { %>
+          <p class="empty-state"><%= translations.noTransactions %></p>
+        <% } else { %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th><%= translations.transactionType %></th>
+                <th><%= translations.description %></th>
+                <th><%= translations.previousBalance %></th>
+                <th><%= translations.amount %></th>
+                <th><%= translations.newBalance %></th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transactions.forEach(function(tx) { %>
+                <tr>
+                  <td><%= tx.id %></td>
+                  <td>
+                    <span class="badge badge-<%= tx.transactionType === 'withdrawal' ? 'danger' : 'success' %>">
+                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.deposit : translations.transfer) %>
+                    </span>
+                  </td>
+                  <td><%= tx.description || '-' %></td>
+                  <td><%= tx.formattedPrevBalance %></td>
+                  <td class="<%= tx.transactionType === 'withdrawal' ? 'text-danger' : 'text-success' %>">
+                    <%= tx.transactionType === 'withdrawal' ? '-' : '+' %><%= tx.formattedAmount %>
+                  </td>
+                  <td><strong><%= tx.formattedNewBalance %></strong></td>
+                  <td><%= tx.formattedDate %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <%- include('../partials/pagination') %>
+        <% } %>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p></footer>
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>

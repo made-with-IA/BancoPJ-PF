@@ -1,0 +1,18 @@
+<% if (locals.pagination && pagination.totalPages > 1) { %>
+<div class="pagination">
+  <span class="pagination-info">
+    <%= translations.showing %> <%= ((pagination.page - 1) * pagination.limit) + 1 %> <%= translations.to %> <%= Math.min(pagination.page * pagination.limit, pagination.total) %> <%= translations.of %> <%= pagination.total %> <%= translations.results %>
+  </span>
+  <div class="pagination-controls">
+    <% if (pagination.page > 1) { %>
+      <a href="?<%= locals.queryStringWithPage(pagination.page - 1) %>" class="btn btn-sm btn-outline"><%= translations.previousPage %></a>
+    <% } %>
+    <% for (let p = Math.max(1, pagination.page - 2); p <= Math.min(pagination.totalPages, pagination.page + 2); p++) { %>
+      <a href="?<%= locals.queryStringWithPage(p) %>" class="btn btn-sm <%= p === pagination.page ? 'btn-primary' : 'btn-outline' %>"><%= p %></a>
+    <% } %>
+    <% if (pagination.page < pagination.totalPages) { %>
+      <a href="?<%= locals.queryStringWithPage(pagination.page + 1) %>" class="btn btn-sm btn-outline"><%= translations.nextPage %></a>
+    <% } %>
+  </div>
+</div>
+<% } %>

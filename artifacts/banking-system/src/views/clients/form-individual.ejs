@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="main-content">
+    <div class="page-header">
+      <h1><%= client ? '✏️ Editar' : '➕ Novo' %> <%= translations.individualClient %></h1>
+      <a href="/clientes/individual" class="btn btn-outline"><%= translations.cancel %></a>
+    </div>
+
+    <%- include('../partials/errors') %>
+
+    <div class="card">
+      <form method="POST" action="<%= client ? '/clientes/individual/' + client.id + '/editar' : '/clientes/individual' %>" class="form">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="fullName" class="form-label required"><%= translations.fullName %></label>
+            <input type="text" id="fullName" name="fullName" value="<%= client ? client.fullName : '' %>" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="age" class="form-label required"><%= translations.age %></label>
+            <input type="number" id="age" name="age" value="<%= client ? client.age : '' %>" min="1" max="120" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="monthlyIncome" class="form-label required"><%= translations.monthlyIncome %></label>
+            <input type="number" id="monthlyIncome" name="monthlyIncome" value="<%= client ? client.monthlyIncome : '' %>" step="0.01" min="0" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="phone" class="form-label"><%= translations.phone %></label>
+            <input type="text" id="phone" name="phone" value="<%= client ? client.phone : '' %>" class="form-control" placeholder="(11) 99999-9999" />
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label"><%= translations.email %></label>
+            <input type="email" id="email" name="email" value="<%= client ? client.email : '' %>" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="category" class="form-label"><%= translations.category %></label>
+            <select id="category" name="category" class="form-control">
+              <option value="standard" <%= (!client || client.category === 'standard') ? 'selected' : '' %>>Padrão</option>
+              <option value="premium" <%= (client && client.category === 'premium') ? 'selected' : '' %>>Premium</option>
+              <option value="vip" <%= (client && client.category === 'vip') ? 'selected' : '' %>>VIP</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="balance" class="form-label"><%= translations.balance %></label>
+            <input type="number" id="balance" name="balance" value="<%= client ? client.balance : '0' %>" step="0.01" min="0" class="form-control" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary"><%= translations.save %></button>
+          <a href="/clientes/individual" class="btn btn-outline"><%= translations.cancel %></a>
+        </div>
+      </form>
+    </div>
+  </main>
+  <footer class="footer"><p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p></footer>
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>

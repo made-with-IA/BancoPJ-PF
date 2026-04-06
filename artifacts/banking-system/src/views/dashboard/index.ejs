@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="main-content">
+    <div class="page-header">
+      <h1>📊 <%= translations.dashboard %></h1>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="stats-grid">
+      <div class="stat-card stat-primary">
+        <div class="stat-icon">👥</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= totalClients %></div>
+          <div class="stat-label"><%= translations.totalClients %></div>
+        </div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-icon">🧑</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= totalIndividual %></div>
+          <div class="stat-label"><%= translations.totalIndividual %></div>
+        </div>
+      </div>
+      <div class="stat-card stat-purple">
+        <div class="stat-icon">🏢</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= totalBusiness %></div>
+          <div class="stat-label"><%= translations.totalBusiness %></div>
+        </div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-icon">💰</div>
+        <div class="stat-body">
+          <div class="stat-value"><%= totalBalance %></div>
+          <div class="stat-label"><%= translations.totalBalance %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-half">
+        <div class="card">
+          <div class="card-header">
+            <h2><%= translations.totalIndividual %></h2>
+          </div>
+          <div class="card-body">
+            <p class="balance-display"><%= totalIndividualBalance %></p>
+            <div class="btn-group mt-3">
+              <a href="/clientes/individual" class="btn btn-primary">Ver Pessoa Física</a>
+              <a href="/clientes/individual/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-half">
+        <div class="card">
+          <div class="card-header">
+            <h2><%= translations.totalBusiness %></h2>
+          </div>
+          <div class="card-body">
+            <p class="balance-display"><%= totalBusinessBalance %></p>
+            <div class="btn-group mt-3">
+              <a href="/clientes/business" class="btn btn-primary">Ver Pessoa Jurídica</a>
+              <a href="/clientes/business/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <h2>🔄 <%= translations.recentTransactions %></h2>
+      </div>
+      <div class="card-body">
+        <% if (recentTransactions.length === 0) { %>
+          <p class="empty-state"><%= translations.noTransactions %></p>
+        <% } else { %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th><%= translations.clientType %></th>
+                <th><%= translations.amount %></th>
+                <th><%= translations.newBalance %></th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentTransactions.forEach(function(tx) { %>
+                <tr>
+                  <td>
+                    <span class="badge badge-<%= tx.transactionType === 'withdrawal' ? 'danger' : 'success' %>">
+                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.deposit : translations.transfer) %>
+                    </span>
+                  </td>
+                  <td><%= tx.clientType === 'individual' ? translations.individualClient : translations.businessClient %></td>
+                  <td class="<%= tx.transactionType === 'withdrawal' ? 'text-danger' : 'text-success' %>"><%= tx.formattedAmount %></td>
+                  <td><%= tx.formattedNewBalance %></td>
+                  <td><%= tx.formattedDate %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p></footer>
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>

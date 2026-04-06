@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="<%= lang || 'pt' %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Sistema Bancário</title>
+  <link rel="stylesheet" href="/banking/css/main.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <main class="main-content">
+    <div class="page-header">
+      <h1>🏢 <%= translations.businessClient %></h1>
+      <div class="page-actions">
+        <a href="/clientes/business/novo" class="btn btn-primary">+ <%= translations.newClient %></a>
+        <a href="/api/exports/business-clients/pdf" class="btn btn-outline" target="_blank"><%= translations.exportPdf %></a>
+        <a href="/api/exports/business-clients/csv" class="btn btn-outline"><%= translations.exportCsv %></a>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="card filter-card">
+      <form method="GET" action="/clientes/business" class="filter-form">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label><%= translations.companyName %> / <%= translations.tradeName %></label>
+            <input type="text" name="name" value="<%= filters.name || '' %>" placeholder="Buscar por nome..." class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><%= translations.cnpj %></label>
+            <input type="text" name="cnpj" value="<%= filters.cnpj || '' %>" placeholder="CNPJ..." class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><%= translations.email %></label>
+            <input type="text" name="email" value="<%= filters.email || '' %>" placeholder="E-mail..." class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><%= translations.category %></label>
+            <select name="category" class="form-control">
+              <option value="">Todas</option>
+              <option value="standard" <%= filters.category === 'standard' ? 'selected' : '' %>>Padrão</option>
+              <option value="premium" <%= filters.category === 'premium' ? 'selected' : '' %>>Premium</option>
+              <option value="corporate" <%= filters.category === 'corporate' ? 'selected' : '' %>>Corporativo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><%= translations.minBalance %></label>
+            <input type="number" name="minBalance" value="<%= filters.minBalance || '' %>" placeholder="0.00" step="0.01" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><%= translations.maxBalance %></label>
+            <input type="number" name="maxBalance" value="<%= filters.maxBalance || '' %>" placeholder="0.00" step="0.01" class="form-control" />
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary"><%= translations.filter %></button>
+          <a href="/clientes/business" class="btn btn-outline"><%= translations.clearFilters %></a>
+        </div>
+      </form>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <% if (clients.length === 0) { %>
+          <p class="empty-state"><%= translations.noRecords %></p>
+        <% } else { %>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th><%= translations.companyName %></th>
+                <th><%= translations.tradeName %></th>
+                <th><%= translations.cnpj %></th>
+                <th><%= translations.category %></th>
+                <th><%= translations.balance %></th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% clients.forEach(function(client) { %>
+                <tr>
+                  <td><%= client.id %></td>
+                  <td><strong><%= client.companyName %></strong></td>
+                  <td><%= client.tradeName %></td>
+                  <td><code><%= client.cnpj %></code></td>
+                  <td><span class="badge badge-<%= client.category %>"><%= translations[client.category] || client.category %></span></td>
+                  <td class="text-right"><strong><%= client.formattedBalance %></strong></td>
+                  <td>
+                    <div class="action-btns">
+                      <a href="/clientes/business/<%= client.id %>" class="btn btn-sm btn-info" title="Detalhes">👁</a>
+                      <a href="/clientes/business/<%= client.id %>/editar" class="btn btn-sm btn-warning" title="<%= translations.edit %>">✏️</a>
+                      <a href="/clientes/business/<%= client.id %>/extrato" class="btn btn-sm btn-blue" title="<%= translations.statement %>">📋</a>
+                      <form method="POST" action="/clientes/business/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
+                        <button type="submit" class="btn btn-sm btn-danger" title="<%= translations.delete %>">🗑</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <%- include('../partials/pagination') %>
+        <% } %>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><p>Sistema Bancário &copy; <%= new Date().getFullYear() %></p></footer>
+  <script src="/banking/js/main.js"></script>
+</body>
+</html>
