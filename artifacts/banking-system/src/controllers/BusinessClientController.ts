@@ -13,26 +13,27 @@ import { DEFAULT_PAGE_SIZE, BUSINESS_CLIENT_MAX_WITHDRAWAL } from '../config/con
 
 const exportService = new ExportService();
 
-export class BusinessClientController {
-  private getService(clientId: number = 0): BusinessClientService {
-    return new BusinessClientService(clientId);
-  }
+function parseClientFilters(query: Record<string, unknown>) {
+  return {
+    name: (query.name as string) || undefined,
+    email: (query.email as string) || undefined,
+    category: (query.category as string) || undefined,
+    cnpj: (query.cnpj as string) || undefined,
+    minBalance: query.minBalance ? parseFloat(query.minBalance as string) : undefined,
+    maxBalance: query.maxBalance ? parseFloat(query.maxBalance as string) : undefined,
+  };
+}
 
+export class BusinessClientController {
+  private service = new BusinessClientService();
+
+  // GET /clientes/pj
   list = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || DEFAULT_PAGE_SIZE;
-      const filters = {
-        name: req.query.name as string || undefined,
-        email: req.query.email as string || undefined,
-        category: req.query.category as string || undefined,
-        cnpj: req.query.cnpj as string || undefined,
-        minBalance: req.query.minBalance ? parseFloat(req.query.minBalance as string) : undefined,
-        maxBalance: req.query.maxBalance ? parseFloat(req.query.maxBalance as string) : undefined,
-      };
-
-      const service = this.getService();
-      const result = service.listClients(filters, { page, limit });
+      const filters = parseClientFilters(req.query as Record<string, unknown>);
+      const result = this.service.listClients(filters, { page, limit });
       const settings = res.locals.settings;
 
       const formattedClients = result.data.map(c => ({
@@ -62,6 +63,7 @@ export class BusinessClientController {
     }
   };
 
+  // GET /clientes/pj/novo
   newForm = (req: Request, res: Response): void => {
     res.render('clients/form-business', {
       title: res.locals.t('newClient'),
@@ -73,6 +75,7 @@ export class BusinessClientController {
     });
   };
 
+  // POST /clientes/pj
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const parsed = createBusinessClientSchema.safeParse(req.body);
@@ -87,19 +90,18 @@ export class BusinessClientController {
         });
         return;
       }
-      const service = this.getService();
-      service.createClient(parsed.data);
-      res.redirect(`/clientes/business?flash=${encodeURIComponent(res.locals.t('clientCreated'))}&flashType=success`);
+      this.service.createClient(parsed.data);
+      res.redirect(`/clientes/pj?flash=${encodeURIComponent(res.locals.t('clientCreated'))}&flashType=success`);
     } catch (err) {
       next(err);
     }
   };
 
+  // GET /clientes/pj/:id
   show = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const client = service.getClient(id);
+      const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
       const settings = res.locals.settings;
@@ -125,11 +127,11 @@ export class BusinessClientController {
     }
   };
 
+  // GET /clientes/pj/:id/editar
   editForm = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const client = service.getClient(id);
+      const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
       res.render('clients/form-business', {
@@ -145,13 +147,13 @@ export class BusinessClientController {
     }
   };
 
+  // POST /clientes/pj/:id/editar
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
       const parsed = updateBusinessClientSchema.safeParse(req.body);
       if (!parsed.success) {
-        const service = this.getService(id);
-        const client = service.getClient(id);
+        const client = this.service.getClient(id);
         res.render('clients/form-business', {
           title: res.locals.t('edit'),
           client: { ...client, ...req.body, id },
@@ -162,47 +164,47 @@ export class BusinessClientController {
         });
         return;
       }
-      const service = this.getService(id);
-      service.updateClient(id, parsed.data);
-      res.redirect(`/clientes/business/${id}?flash=${encodeURIComponent(res.locals.t('clientUpdated'))}&flashType=success`);
+      const updated = this.service.updateClient(id, parsed.data);
+      if (!updated) throw new NotFoundError('Cliente não encontrado');
+      res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(res.locals.t('clientUpdated'))}&flashType=success`);
     } catch (err) {
       next(err);
     }
   };
 
+  // POST /clientes/pj/:id/excluir
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const deleted = service.deleteClient(id);
+      const deleted = this.service.deleteClient(id);
       if (!deleted) throw new NotFoundError('Cliente não encontrado');
-      res.redirect(`/clientes/business?flash=${encodeURIComponent(res.locals.t('clientDeleted'))}&flashType=success`);
+      res.redirect(`/clientes/pj?flash=${encodeURIComponent(res.locals.t('clientDeleted'))}&flashType=success`);
     } catch (err) {
       next(err);
     }
   };
 
+  // GET /clientes/pj/:id/extrato
   statement = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const client = service.getClient(id);
+      const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
 
       const page = parseInt(req.query.page as string) || 1;
       const filters = {
-        transactionType: req.query.transactionType as string || undefined,
-        startDate: req.query.startDate as string || undefined,
-        endDate: req.query.endDate as string || undefined,
+        transactionType: (req.query.transactionType as string) || undefined,
+        startDate: (req.query.startDate as string) || undefined,
+        endDate: (req.query.endDate as string) || undefined,
         page,
         limit: DEFAULT_PAGE_SIZE,
       };
 
-      const statementService = new BusinessClientService(id);
-      const statement = await statementService.getStatement(filters);
+      const service = new BusinessClientService(id);
+      const statementData = await service.getStatement(filters);
       const settings = res.locals.settings;
 
-      const formattedTransactions = statement.transactions.map(tx => ({
+      const formattedTransactions = statementData.transactions.map(tx => ({
         ...tx,
         formattedAmount: formatCurrency(tx.amount, settings),
         formattedDate: formatDate(tx.createdAt, settings),
@@ -213,14 +215,14 @@ export class BusinessClientController {
       res.render('clients/statement', {
         title: `${res.locals.t('statement')} - ${client.companyName}`,
         client: { ...client, formattedBalance: formatCurrency(client.balance, settings), name: client.companyName },
-        clientType: 'business',
+        clientType: 'pj',
         transactions: formattedTransactions,
-        currentBalance: formatCurrency(statement.currentBalance, settings),
+        currentBalance: formatCurrency(statementData.currentBalance, settings),
         pagination: {
-          total: statement.total,
-          page: statement.page,
-          limit: statement.limit,
-          totalPages: statement.totalPages,
+          total: statementData.total,
+          page: statementData.page,
+          limit: statementData.limit,
+          totalPages: statementData.totalPages,
         },
         filters,
         translations: res.locals.translations,
@@ -232,42 +234,37 @@ export class BusinessClientController {
     }
   };
 
+  // POST /clientes/pj/:id/saque (web form)
   webWithdraw = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
       const parsed = withdrawalSchema.safeParse(req.body);
       if (!parsed.success) {
         const errs = formatZodErrors(parsed.error);
-        res.redirect(`/clientes/business/${id}?flash=${encodeURIComponent(errs[0]?.message || 'Erro')}&flashType=error`);
+        res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(errs[0]?.message || 'Erro')}&flashType=error`);
         return;
       }
       const service = new BusinessClientService(id);
       await service.withdrawMoney(parsed.data.amount);
-      res.redirect(`/clientes/business/${id}?flash=${encodeURIComponent(res.locals.t('withdrawalSuccess'))}&flashType=success`);
+      res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(res.locals.t('withdrawalSuccess'))}&flashType=success`);
     } catch (err) {
       if (err instanceof AppError) {
         const id = parseInt(req.params.id);
-        res.redirect(`/clientes/business/${id}?flash=${encodeURIComponent(err.message)}&flashType=error`);
+        res.redirect(`/clientes/pj/${id}?flash=${encodeURIComponent(err.message)}&flashType=error`);
         return;
       }
       next(err);
     }
   };
 
+  // --- API routes ---
+
   apiList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || DEFAULT_PAGE_SIZE;
-      const filters = {
-        name: req.query.name as string || undefined,
-        email: req.query.email as string || undefined,
-        category: req.query.category as string || undefined,
-        cnpj: req.query.cnpj as string || undefined,
-        minBalance: req.query.minBalance ? parseFloat(req.query.minBalance as string) : undefined,
-        maxBalance: req.query.maxBalance ? parseFloat(req.query.maxBalance as string) : undefined,
-      };
-      const service = this.getService();
-      const result = service.listClients(filters, { page, limit });
+      const filters = parseClientFilters(req.query as Record<string, unknown>);
+      const result = this.service.listClients(filters, { page, limit });
       res.json(result);
     } catch (err) {
       next(err);
@@ -281,8 +278,7 @@ export class BusinessClientController {
         res.status(400).json({ error: 'Validation Error', errors: formatZodErrors(parsed.error) });
         return;
       }
-      const service = this.getService();
-      const client = service.createClient(parsed.data);
+      const client = this.service.createClient(parsed.data);
       res.status(201).json(client);
     } catch (err) {
       next(err);
@@ -292,8 +288,7 @@ export class BusinessClientController {
   apiGet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const client = service.getClient(id);
+      const client = this.service.getClient(id);
       if (!client) throw new NotFoundError('Cliente não encontrado');
       res.json(client);
     } catch (err) {
@@ -309,8 +304,7 @@ export class BusinessClientController {
         res.status(400).json({ error: 'Validation Error', errors: formatZodErrors(parsed.error) });
         return;
       }
-      const service = this.getService(id);
-      const updated = service.updateClient(id, parsed.data);
+      const updated = this.service.updateClient(id, parsed.data);
       if (!updated) throw new NotFoundError('Cliente não encontrado');
       res.json(updated);
     } catch (err) {
@@ -321,8 +315,7 @@ export class BusinessClientController {
   apiDelete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id);
-      const service = this.getService(id);
-      const deleted = service.deleteClient(id);
+      const deleted = this.service.deleteClient(id);
       if (!deleted) throw new NotFoundError('Cliente não encontrado');
       res.json({ success: true, message: 'Cliente excluído com sucesso' });
     } catch (err) {
@@ -351,9 +344,9 @@ export class BusinessClientController {
       const id = parseInt(req.params.id);
       const page = parseInt(req.query.page as string) || 1;
       const filters = {
-        transactionType: req.query.transactionType as string || undefined,
-        startDate: req.query.startDate as string || undefined,
-        endDate: req.query.endDate as string || undefined,
+        transactionType: (req.query.transactionType as string) || undefined,
+        startDate: (req.query.startDate as string) || undefined,
+        endDate: (req.query.endDate as string) || undefined,
         page,
         limit: parseInt(req.query.limit as string) || DEFAULT_PAGE_SIZE,
       };
@@ -367,16 +360,8 @@ export class BusinessClientController {
 
   exportPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = {
-        name: req.query.name as string || undefined,
-        email: req.query.email as string || undefined,
-        category: req.query.category as string || undefined,
-        cnpj: req.query.cnpj as string || undefined,
-        minBalance: req.query.minBalance ? parseFloat(req.query.minBalance as string) : undefined,
-        maxBalance: req.query.maxBalance ? parseFloat(req.query.maxBalance as string) : undefined,
-      };
-      const service = this.getService();
-      const result = service.listClients(filters, { page: 1, limit: 9999 });
+      const filters = parseClientFilters(req.query as Record<string, unknown>);
+      const result = this.service.listClients(filters, { page: 1, limit: 9999 });
       exportService.exportBusinessClientsPdf(result.data, res.locals.settings, res);
     } catch (err) {
       next(err);
@@ -385,16 +370,8 @@ export class BusinessClientController {
 
   exportCsv = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const filters = {
-        name: req.query.name as string || undefined,
-        email: req.query.email as string || undefined,
-        category: req.query.category as string || undefined,
-        cnpj: req.query.cnpj as string || undefined,
-        minBalance: req.query.minBalance ? parseFloat(req.query.minBalance as string) : undefined,
-        maxBalance: req.query.maxBalance ? parseFloat(req.query.maxBalance as string) : undefined,
-      };
-      const service = this.getService();
-      const result = service.listClients(filters, { page: 1, limit: 9999 });
+      const filters = parseClientFilters(req.query as Record<string, unknown>);
+      const result = this.service.listClients(filters, { page: 1, limit: 9999 });
       await exportService.exportBusinessClientsCsv(result.data, res.locals.settings, res);
     } catch (err) {
       next(err);

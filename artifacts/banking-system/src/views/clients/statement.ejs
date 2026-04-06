@@ -11,7 +11,7 @@
   <main class="main-content">
     <div class="page-header">
       <h1>📋 <%= translations.statement %></h1>
-      <a href="/clientes/<%= clientType %>/<%= client.id %>" class="btn btn-outline">← Voltar</a>
+      <a href="/clientes/<%= clientType %>/<%= client.id %>" class="btn btn-outline">← <%= translations.back %></a>
     </div>
 
     <div class="stat-card stat-green mb-4">
@@ -29,8 +29,8 @@
           <div class="form-group">
             <label><%= translations.transactionType %></label>
             <select name="transactionType" class="form-control">
-              <option value="">Todos</option>
-              <option value="deposit" <%= filters.transactionType === 'deposit' ? 'selected' : '' %>><%= translations.deposit %></option>
+              <option value=""><%= translations.allTypes %></option>
+              <option value="deposit" <%= filters.transactionType === 'deposit' ? 'selected' : '' %>><%= translations.depositLabel %></option>
               <option value="withdrawal" <%= filters.transactionType === 'withdrawal' ? 'selected' : '' %>><%= translations.withdrawal %></option>
               <option value="transfer" <%= filters.transactionType === 'transfer' ? 'selected' : '' %>><%= translations.transfer %></option>
             </select>
@@ -54,7 +54,7 @@
     <div class="card">
       <div class="card-header">
         <h2><%= translations.transactionHistory %></h2>
-        <span class="badge-count"><%= pagination.total %> registros</span>
+        <span class="badge-count"><%= pagination.total %> <%= translations.records %></span>
       </div>
       <div class="card-body">
         <% if (transactions.length === 0) { %>
@@ -78,7 +78,7 @@
                   <td><%= tx.id %></td>
                   <td>
                     <span class="badge badge-<%= tx.transactionType === 'withdrawal' ? 'danger' : 'success' %>">
-                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.deposit : translations.transfer) %>
+                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.depositLabel : translations.transfer) %>
                     </span>
                   </td>
                   <td><%= tx.description || '-' %></td>

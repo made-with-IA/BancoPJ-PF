@@ -23,7 +23,6 @@ export class ExportService {
     res.setHeader('Content-Disposition', 'attachment; filename="clientes-pf.pdf"');
     doc.pipe(res);
 
-    // Header
     doc.fontSize(18).font('Helvetica-Bold').text(translations['reportTitle'], { align: 'center' });
     doc.fontSize(10).font('Helvetica').text(
       `${translations['generatedAt']}: ${formatDate(new Date().toISOString(), settings)}`,
@@ -31,7 +30,6 @@ export class ExportService {
     );
     doc.moveDown(2);
 
-    // Table headers
     const headers = [
       translations['fullName'],
       translations['email'],
@@ -52,12 +50,9 @@ export class ExportService {
     doc.moveTo(40, doc.y + 4).lineTo(560, doc.y + 4).stroke();
     doc.moveDown(0.5);
 
-    // Table rows
     doc.fontSize(8).font('Helvetica');
     for (const client of clients) {
-      if (doc.y > 700) {
-        doc.addPage();
-      }
+      if (doc.y > 700) doc.addPage();
       x = 40;
       const rowY = doc.y;
       const row = [
@@ -118,9 +113,7 @@ export class ExportService {
 
     doc.fontSize(8).font('Helvetica');
     for (const client of clients) {
-      if (doc.y > 700) {
-        doc.addPage();
-      }
+      if (doc.y > 700) doc.addPage();
       x = 40;
       const rowY = doc.y;
       const row = [
@@ -159,15 +152,15 @@ export class ExportService {
         { id: 'age', title: translations['age'] },
         { id: 'monthlyIncome', title: translations['monthlyIncome'] },
         { id: 'balance', title: translations['balance'] },
-        { id: 'createdAt', title: 'Data de Cadastro' },
+        { id: 'createdAt', title: translations['registeredAt'] || 'Data de Cadastro' },
       ],
     });
 
     const records = clients.map(c => ({
       id: c.id,
       fullName: c.fullName,
-      email: c.email,
-      phone: c.phone,
+      email: c.email || '',
+      phone: c.phone || '',
       category: c.category,
       age: c.age,
       monthlyIncome: c.monthlyIncome,
@@ -175,16 +168,22 @@ export class ExportService {
       createdAt: formatDate(c.createdAt, settings),
     }));
 
-    await csvWriter.writeRecords(records);
+    try {
+      await csvWriter.writeRecords(records);
 
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="clientes-pf.csv"');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="clientes-pf.csv"');
 
-    const stream = fs.createReadStream(tmpFile);
-    stream.pipe(res);
-    stream.on('end', () => {
+      await new Promise<void>((resolve, reject) => {
+        const stream = fs.createReadStream(tmpFile);
+        stream.pipe(res);
+        stream.on('end', resolve);
+        stream.on('error', reject);
+        res.on('error', reject);
+      });
+    } finally {
       fs.unlink(tmpFile, () => {});
-    });
+    }
   }
 
   async exportBusinessClientsCsv(
@@ -206,7 +205,7 @@ export class ExportService {
         { id: 'phone', title: translations['phone'] },
         { id: 'category', title: translations['category'] },
         { id: 'balance', title: translations['balance'] },
-        { id: 'createdAt', title: 'Data de Cadastro' },
+        { id: 'createdAt', title: translations['registeredAt'] || 'Data de Cadastro' },
       ],
     });
 
@@ -215,22 +214,28 @@ export class ExportService {
       companyName: c.companyName,
       tradeName: c.tradeName,
       cnpj: c.cnpj,
-      email: c.email,
-      phone: c.phone,
+      email: c.email || '',
+      phone: c.phone || '',
       category: c.category,
       balance: c.balance,
       createdAt: formatDate(c.createdAt, settings),
     }));
 
-    await csvWriter.writeRecords(records);
+    try {
+      await csvWriter.writeRecords(records);
 
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="clientes-pj.csv"');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="clientes-pj.csv"');
 
-    const stream = fs.createReadStream(tmpFile);
-    stream.pipe(res);
-    stream.on('end', () => {
+      await new Promise<void>((resolve, reject) => {
+        const stream = fs.createReadStream(tmpFile);
+        stream.pipe(res);
+        stream.on('end', resolve);
+        stream.on('error', reject);
+        res.on('error', reject);
+      });
+    } finally {
       fs.unlink(tmpFile, () => {});
-    });
+    }
   }
 }

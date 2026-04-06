@@ -1,3 +1,4 @@
+import { getDatabase } from '../database/connection';
 import { IndividualClientRepository } from '../repositories/IndividualClientRepository';
 import { TransactionRepository } from '../repositories/TransactionRepository';
 import {
@@ -50,17 +51,22 @@ export class IndividualClientService implements IClient {
     const previousBalance = client.balance;
     const newBalance = previousBalance - amount;
 
-    this.repo.updateBalance(this.clientId, newBalance);
-
-    const transaction = this.transactionRepo.create({
-      clientId: this.clientId,
-      clientType: CLIENT_TYPES.INDIVIDUAL,
-      transactionType: TRANSACTION_TYPES.WITHDRAWAL,
-      amount,
-      description: 'Saque',
-      previousBalance,
-      newBalance,
+    // Perform balance update and transaction creation atomically
+    const db = getDatabase();
+    const txFn = db.transaction(() => {
+      this.repo.updateBalance(this.clientId, newBalance);
+      return this.transactionRepo.create({
+        clientId: this.clientId,
+        clientType: CLIENT_TYPES.INDIVIDUAL,
+        transactionType: TRANSACTION_TYPES.WITHDRAWAL,
+        amount,
+        description: 'Saque',
+        previousBalance,
+        newBalance,
+      });
     });
+
+    const transaction = txFn();
 
     return {
       success: true,
@@ -139,17 +145,21 @@ export class IndividualClientService implements IClient {
     const previousBalance = client.balance;
     const newBalance = previousBalance + amount;
 
-    this.repo.updateBalance(id, newBalance);
-
-    const transaction = this.transactionRepo.create({
-      clientId: id,
-      clientType: CLIENT_TYPES.INDIVIDUAL,
-      transactionType: TRANSACTION_TYPES.DEPOSIT,
-      amount,
-      description,
-      previousBalance,
-      newBalance,
+    const db = getDatabase();
+    const txFn = db.transaction(() => {
+      this.repo.updateBalance(id, newBalance);
+      return this.transactionRepo.create({
+        clientId: id,
+        clientType: CLIENT_TYPES.INDIVIDUAL,
+        transactionType: TRANSACTION_TYPES.DEPOSIT,
+        amount,
+        description,
+        previousBalance,
+        newBalance,
+      });
     });
+
+    const transaction = txFn();
 
     return {
       success: true,

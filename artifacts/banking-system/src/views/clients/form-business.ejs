@@ -10,14 +10,14 @@
   <%- include('../partials/navbar') %>
   <main class="main-content">
     <div class="page-header">
-      <h1><%= client ? '✏️ Editar' : '➕ Novo' %> <%= translations.businessClient %></h1>
-      <a href="/clientes/business" class="btn btn-outline"><%= translations.cancel %></a>
+      <h1><%= client ? '✏️ ' + translations.edit : '➕ ' + translations.newClient %> <%= translations.businessClient %></h1>
+      <a href="/clientes/pj" class="btn btn-outline"><%= translations.cancel %></a>
     </div>
 
     <%- include('../partials/errors') %>
 
     <div class="card">
-      <form method="POST" action="<%= client ? '/clientes/business/' + client.id + '/editar' : '/clientes/business' %>" class="form">
+      <form method="POST" action="<%= client ? '/clientes/pj/' + client.id + '/editar' : '/clientes/pj' %>" class="form">
         <div class="form-grid">
           <div class="form-group full-width">
             <label for="companyName" class="form-label required"><%= translations.companyName %></label>
@@ -42,9 +42,9 @@
           <div class="form-group">
             <label for="category" class="form-label"><%= translations.category %></label>
             <select id="category" name="category" class="form-control">
-              <option value="standard" <%= (!client || client.category === 'standard') ? 'selected' : '' %>>Padrão</option>
-              <option value="premium" <%= (client && client.category === 'premium') ? 'selected' : '' %>>Premium</option>
-              <option value="corporate" <%= (client && client.category === 'corporate') ? 'selected' : '' %>>Corporativo</option>
+              <option value="standard" <%= (!client || client.category === 'standard') ? 'selected' : '' %>><%= translations.standard %></option>
+              <option value="premium" <%= (client && client.category === 'premium') ? 'selected' : '' %>><%= translations.premium %></option>
+              <option value="corporate" <%= (client && client.category === 'corporate') ? 'selected' : '' %>><%= translations.corporate %></option>
             </select>
           </div>
           <div class="form-group">
@@ -54,7 +54,7 @@
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary"><%= translations.save %></button>
-          <a href="/clientes/business" class="btn btn-outline"><%= translations.cancel %></a>
+          <a href="/clientes/pj" class="btn btn-outline"><%= translations.cancel %></a>
         </div>
       </form>
     </div>

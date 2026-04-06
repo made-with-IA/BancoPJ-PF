@@ -1,65 +1,10 @@
 import request from 'supertest';
-import path from 'path';
-import fs from 'fs';
 import Database from 'better-sqlite3';
 
-// Use in-memory test DB
 process.env.DB_PATH = ':memory:';
 
 import app from '../src/app';
-
-function initTestDb() {
-  const { getDatabase } = require('../src/database/connection');
-  const db: Database.Database = getDatabase();
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS individual_clients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      monthly_income REAL NOT NULL DEFAULT 0,
-      age INTEGER NOT NULL,
-      phone TEXT,
-      email TEXT,
-      category TEXT DEFAULT 'standard',
-      balance REAL NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS business_clients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      company_name TEXT NOT NULL,
-      trade_name TEXT NOT NULL,
-      cnpj TEXT NOT NULL UNIQUE,
-      phone TEXT,
-      email TEXT,
-      category TEXT DEFAULT 'standard',
-      balance REAL NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS transactions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      client_id INTEGER NOT NULL,
-      client_type TEXT NOT NULL,
-      transaction_type TEXT NOT NULL,
-      amount REAL NOT NULL,
-      description TEXT,
-      previous_balance REAL NOT NULL,
-      new_balance REAL NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL DEFAULT 'pt',
-      currency_format TEXT NOT NULL DEFAULT 'BRL',
-      date_format TEXT NOT NULL DEFAULT 'DD/MM/YYYY',
-      active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    INSERT OR IGNORE INTO settings (language, currency_format, date_format, active) VALUES ('pt', 'BRL', 'DD/MM/YYYY', 1);
-  `);
-  return db;
-}
+import { initTestDb, closeTestDb, clearTestDb } from './helpers/setupDb';
 
 let db: Database.Database;
 
@@ -68,16 +13,15 @@ beforeAll(() => {
 });
 
 afterEach(() => {
-  db.exec('DELETE FROM transactions; DELETE FROM individual_clients; DELETE FROM business_clients;');
+  clearTestDb(db);
 });
 
 afterAll(() => {
-  const { closeDatabase } = require('../src/database/connection');
-  closeDatabase();
+  closeTestDb();
 });
 
 describe('Individual Client API', () => {
-  test('POST /api/individual-clients - should create a client successfully', async () => {
+  test('POST /api/individual-clients - create client successfully', async () => {
     const res = await request(app)
       .post('/api/individual-clients')
       .send({
@@ -97,7 +41,7 @@ describe('Individual Client API', () => {
     expect(res.body.id).toBeDefined();
   });
 
-  test('POST /api/individual-clients - should return 400 for missing required fields', async () => {
+  test('POST /api/individual-clients - return 400 for missing required fields', async () => {
     const res = await request(app)
       .post('/api/individual-clients')
       .send({ email: 'test@test.com' });
@@ -106,21 +50,11 @@ describe('Individual Client API', () => {
     expect(res.body.error).toBe('Validation Error');
   });
 
-  test('GET /api/individual-clients - should list clients with pagination', async () => {
-    // Create some clients first
-    await request(app).post('/api/individual-clients').send({
-      fullName: 'Alice',
-      age: 25,
-      monthlyIncome: 3000,
-    });
-    await request(app).post('/api/individual-clients').send({
-      fullName: 'Bob',
-      age: 35,
-      monthlyIncome: 4000,
-    });
+  test('GET /api/individual-clients - list with pagination', async () => {
+    await request(app).post('/api/individual-clients').send({ fullName: 'Alice', age: 25, monthlyIncome: 3000 });
+    await request(app).post('/api/individual-clients').send({ fullName: 'Bob', age: 35, monthlyIncome: 4000 });
 
-    const res = await request(app)
-      .get('/api/individual-clients?page=1&limit=10');
+    const res = await request(app).get('/api/individual-clients?page=1&limit=10');
 
     expect(res.status).toBe(200);
     expect(res.body.data).toBeDefined();
@@ -130,7 +64,7 @@ describe('Individual Client API', () => {
     expect(res.body.totalPages).toBe(1);
   });
 
-  test('GET /api/individual-clients - should filter by name', async () => {
+  test('GET /api/individual-clients - filter by name', async () => {
     await request(app).post('/api/individual-clients').send({ fullName: 'Maria Santos', age: 28, monthlyIncome: 2000 });
     await request(app).post('/api/individual-clients').send({ fullName: 'Carlos Oliveira', age: 40, monthlyIncome: 6000 });
 
@@ -141,7 +75,23 @@ describe('Individual Client API', () => {
     expect(res.body.data[0].fullName).toBe('Maria Santos');
   });
 
-  test('PUT /api/individual-clients/:id - should update a client', async () => {
+  test('GET /api/individual-clients - filter by category', async () => {
+    await request(app).post('/api/individual-clients').send({ fullName: 'Standard User', age: 25, monthlyIncome: 2000, category: 'standard' });
+    await request(app).post('/api/individual-clients').send({ fullName: 'Premium User', age: 30, monthlyIncome: 8000, category: 'premium' });
+
+    const res = await request(app).get('/api/individual-clients?category=premium');
+
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.data[0].fullName).toBe('Premium User');
+  });
+
+  test('GET /api/individual-clients/:id - return 404 for non-existent client', async () => {
+    const res = await request(app).get('/api/individual-clients/99999');
+    expect(res.status).toBe(404);
+  });
+
+  test('PUT /api/individual-clients/:id - update a client', async () => {
     const createRes = await request(app)
       .post('/api/individual-clients')
       .send({ fullName: 'Pedro Costa', age: 32, monthlyIncome: 4500 });
@@ -157,7 +107,14 @@ describe('Individual Client API', () => {
     expect(updateRes.body.age).toBe(33);
   });
 
-  test('DELETE /api/individual-clients/:id - should delete a client', async () => {
+  test('PUT /api/individual-clients/:id - return 404 for non-existent client', async () => {
+    const res = await request(app)
+      .put('/api/individual-clients/99999')
+      .send({ fullName: 'Ghost' });
+    expect(res.status).toBe(404);
+  });
+
+  test('DELETE /api/individual-clients/:id - delete a client', async () => {
     const createRes = await request(app)
       .post('/api/individual-clients')
       .send({ fullName: 'To Delete', age: 25, monthlyIncome: 2000 });
@@ -189,7 +146,7 @@ describe('Individual Client API', () => {
     expect(withdrawRes.body.previousBalance).toBe(2000);
   });
 
-  test('POST /api/individual-clients/:id/withdraw - should fail on insufficient balance', async () => {
+  test('POST /api/individual-clients/:id/withdraw - fail on insufficient balance', async () => {
     const createRes = await request(app)
       .post('/api/individual-clients')
       .send({ fullName: 'Sem Saldo', age: 30, monthlyIncome: 5000, balance: 100 });
@@ -204,7 +161,7 @@ describe('Individual Client API', () => {
     expect(withdrawRes.body.message).toContain('Saldo insuficiente');
   });
 
-  test('POST /api/individual-clients/:id/withdraw - should fail when exceeding individual limit of 1000', async () => {
+  test('POST /api/individual-clients/:id/withdraw - fail when exceeding individual limit of 1000', async () => {
     const createRes = await request(app)
       .post('/api/individual-clients')
       .send({ fullName: 'Limite Excedido PF', age: 30, monthlyIncome: 5000, balance: 10000 });
@@ -219,14 +176,20 @@ describe('Individual Client API', () => {
     expect(withdrawRes.body.message).toContain('limite');
   });
 
-  test('GET /api/individual-clients/:id/statement - should return statement', async () => {
+  test('POST /api/individual-clients/:id/withdraw - fail for non-existent client', async () => {
+    const res = await request(app)
+      .post('/api/individual-clients/99999/withdraw')
+      .send({ amount: 100 });
+    expect(res.status).toBe(404);
+  });
+
+  test('GET /api/individual-clients/:id/statement - return statement', async () => {
     const createRes = await request(app)
       .post('/api/individual-clients')
       .send({ fullName: 'Extrato Teste', age: 30, monthlyIncome: 5000, balance: 5000 });
 
     const id = createRes.body.id;
 
-    // Make a withdrawal first
     await request(app).post(`/api/individual-clients/${id}/withdraw`).send({ amount: 200 });
 
     const statementRes = await request(app).get(`/api/individual-clients/${id}/statement`);

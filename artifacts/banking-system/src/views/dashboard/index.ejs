@@ -55,8 +55,8 @@
           <div class="card-body">
             <p class="balance-display"><%= totalIndividualBalance %></p>
             <div class="btn-group mt-3">
-              <a href="/clientes/individual" class="btn btn-primary">Ver Pessoa Física</a>
-              <a href="/clientes/individual/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
+              <a href="/clientes/pf" class="btn btn-primary"><%= translations.viewIndividual %></a>
+              <a href="/clientes/pf/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
             </div>
           </div>
         </div>
@@ -69,8 +69,8 @@
           <div class="card-body">
             <p class="balance-display"><%= totalBusinessBalance %></p>
             <div class="btn-group mt-3">
-              <a href="/clientes/business" class="btn btn-primary">Ver Pessoa Jurídica</a>
-              <a href="/clientes/business/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
+              <a href="/clientes/pj" class="btn btn-primary"><%= translations.viewBusiness %></a>
+              <a href="/clientes/pj/novo" class="btn btn-outline">+ <%= translations.newClient %></a>
             </div>
           </div>
         </div>
@@ -88,7 +88,7 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Tipo</th>
+                <th><%= translations.transactionType %></th>
                 <th><%= translations.clientType %></th>
                 <th><%= translations.amount %></th>
                 <th><%= translations.newBalance %></th>
@@ -100,7 +100,7 @@
                 <tr>
                   <td>
                     <span class="badge badge-<%= tx.transactionType === 'withdrawal' ? 'danger' : 'success' %>">
-                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.deposit : translations.transfer) %>
+                      <%= tx.transactionType === 'withdrawal' ? translations.withdrawal : (tx.transactionType === 'deposit' ? translations.depositLabel : translations.transfer) %>
                     </span>
                   </td>
                   <td><%= tx.clientType === 'individual' ? translations.individualClient : translations.businessClient %></td>

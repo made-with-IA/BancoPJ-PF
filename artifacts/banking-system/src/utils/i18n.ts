@@ -22,6 +22,7 @@ const translations: Record<string, Record<string, string>> = {
     deposit: 'Depositar',
     viewStatement: 'Ver Extrato',
     viewDetails: 'Ver Detalhes',
+    actions: 'Ações',
 
     // Client Types
     individualClient: 'Pessoa Física',
@@ -47,6 +48,8 @@ const translations: Record<string, Record<string, string>> = {
     premium: 'Premium',
     vip: 'VIP',
     corporate: 'Corporativo',
+    allCategories: 'Todas',
+    allTypes: 'Todos',
 
     // Transaction
     transactionType: 'Tipo de Transação',
@@ -54,7 +57,7 @@ const translations: Record<string, Record<string, string>> = {
     description: 'Descrição',
     previousBalance: 'Saldo Anterior',
     newBalance: 'Novo Saldo',
-    deposit: 'Depósito',
+    depositLabel: 'Depósito',
     withdrawal: 'Saque',
     transfer: 'Transferência',
 
@@ -83,6 +86,26 @@ const translations: Record<string, Record<string, string>> = {
     confirmDelete: 'Tem certeza que deseja excluir este cliente?',
     noRecords: 'Nenhum registro encontrado.',
     errorGeneric: 'Ocorreu um erro. Tente novamente.',
+
+    // Detail labels
+    clientData: 'Dados do Cliente',
+    companyData: 'Dados da Empresa',
+    registeredAt: 'Cadastrado em',
+    updatedAt: 'Atualizado em',
+    withdrawalLimit: 'Limite de Saque',
+    systemPreferences: 'Preferências do Sistema',
+    systemInfo: 'Informações do Sistema',
+    viewIndividual: 'Ver Pessoa Física',
+    viewBusiness: 'Ver Pessoa Jurídica',
+    back: 'Voltar',
+    records: 'registros',
+    years: 'anos',
+
+    // Error page titles
+    validationError: 'Erro de Validação',
+    notFound: 'Não Encontrado',
+    error: 'Erro',
+    internalError: 'Erro Interno',
 
     // Validation errors
     requiredField: 'Campo obrigatório',
@@ -117,7 +140,6 @@ const translations: Record<string, Record<string, string>> = {
     // Export
     reportTitle: 'Relatório de Clientes - Sistema Bancário',
     generatedAt: 'Gerado em',
-    withdrawalLimit: 'Limite de Saque',
   },
   en: {
     // Navigation
@@ -142,6 +164,7 @@ const translations: Record<string, Record<string, string>> = {
     deposit: 'Deposit',
     viewStatement: 'View Statement',
     viewDetails: 'View Details',
+    actions: 'Actions',
 
     // Client Types
     individualClient: 'Individual Client',
@@ -167,6 +190,8 @@ const translations: Record<string, Record<string, string>> = {
     premium: 'Premium',
     vip: 'VIP',
     corporate: 'Corporate',
+    allCategories: 'All',
+    allTypes: 'All',
 
     // Transaction
     transactionType: 'Transaction Type',
@@ -174,7 +199,7 @@ const translations: Record<string, Record<string, string>> = {
     description: 'Description',
     previousBalance: 'Previous Balance',
     newBalance: 'New Balance',
-    deposit: 'Deposit',
+    depositLabel: 'Deposit',
     withdrawal: 'Withdrawal',
     transfer: 'Transfer',
 
@@ -203,6 +228,26 @@ const translations: Record<string, Record<string, string>> = {
     confirmDelete: 'Are you sure you want to delete this client?',
     noRecords: 'No records found.',
     errorGeneric: 'An error occurred. Please try again.',
+
+    // Detail labels
+    clientData: 'Client Data',
+    companyData: 'Company Data',
+    registeredAt: 'Registered at',
+    updatedAt: 'Updated at',
+    withdrawalLimit: 'Withdrawal Limit',
+    systemPreferences: 'System Preferences',
+    systemInfo: 'System Information',
+    viewIndividual: 'View Individual Clients',
+    viewBusiness: 'View Business Clients',
+    back: 'Back',
+    records: 'records',
+    years: 'years old',
+
+    // Error page titles
+    validationError: 'Validation Error',
+    notFound: 'Not Found',
+    error: 'Error',
+    internalError: 'Internal Error',
 
     // Validation errors
     requiredField: 'Required field',
@@ -237,7 +282,6 @@ const translations: Record<string, Record<string, string>> = {
     // Export
     reportTitle: 'Client Report - Banking System',
     generatedAt: 'Generated at',
-    withdrawalLimit: 'Withdrawal Limit',
   },
 };
 

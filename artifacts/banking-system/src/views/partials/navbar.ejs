@@ -6,10 +6,10 @@
     <li><a href="/" class="<%= locals.path === '/' ? 'active' : '' %>"><%= translations.dashboard %></a></li>
     <li>
       <span class="nav-separator">|</span>
-      <a href="/clientes/individual" class="<%= (locals.path || '').includes('/clientes/individual') ? 'active' : '' %>">🧑 <%= translations.individualClient %></a>
+      <a href="/clientes/pf" class="<%= (locals.path || '').startsWith('/clientes/pf') ? 'active' : '' %>">🧑 <%= translations.individualClient %></a>
     </li>
     <li>
-      <a href="/clientes/business" class="<%= (locals.path || '').includes('/clientes/business') ? 'active' : '' %>">🏢 <%= translations.businessClient %></a>
+      <a href="/clientes/pj" class="<%= (locals.path || '').startsWith('/clientes/pj') ? 'active' : '' %>">🏢 <%= translations.businessClient %></a>
     </li>
     <li>
       <span class="nav-separator">|</span>

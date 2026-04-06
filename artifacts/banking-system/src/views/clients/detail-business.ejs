@@ -12,9 +12,9 @@
     <div class="page-header">
       <h1>🏢 <%= client.companyName %></h1>
       <div class="page-actions">
-        <a href="/clientes/business/<%= client.id %>/editar" class="btn btn-warning"><%= translations.edit %></a>
-        <a href="/clientes/business/<%= client.id %>/extrato" class="btn btn-blue"><%= translations.statement %></a>
-        <form method="POST" action="/clientes/business/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
+        <a href="/clientes/pj/<%= client.id %>/editar" class="btn btn-warning"><%= translations.edit %></a>
+        <a href="/clientes/pj/<%= client.id %>/extrato" class="btn btn-blue"><%= translations.statement %></a>
+        <form method="POST" action="/clientes/pj/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
           <button type="submit" class="btn btn-danger"><%= translations.delete %></button>
         </form>
       </div>
@@ -25,7 +25,7 @@
     <div class="row">
       <div class="col-two-thirds">
         <div class="card">
-          <div class="card-header"><h2>Dados da Empresa</h2></div>
+          <div class="card-header"><h2><%= translations.companyData %></h2></div>
           <div class="card-body">
             <div class="detail-grid">
               <div class="detail-item">
@@ -53,11 +53,11 @@
                 <span class="detail-value"><span class="badge badge-<%= client.category %>"><%= translations[client.category] || client.category %></span></span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Cadastrado em</span>
+                <span class="detail-label"><%= translations.registeredAt %></span>
                 <span class="detail-value"><%= client.formattedCreatedAt %></span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Atualizado em</span>
+                <span class="detail-label"><%= translations.updatedAt %></span>
                 <span class="detail-value"><%= client.formattedUpdatedAt %></span>
               </div>
             </div>
@@ -70,14 +70,14 @@
           <div class="card-header"><h2><%= translations.balance %></h2></div>
           <div class="card-body center">
             <div class="balance-amount"><%= client.formattedBalance %></div>
-            <div class="balance-limit">Limite de saque: <strong><%= formattedMaxWithdrawal %></strong></div>
+            <div class="balance-limit"><%= translations.withdrawalLimit %>: <strong><%= formattedMaxWithdrawal %></strong></div>
           </div>
         </div>
 
         <div class="card mt-3">
           <div class="card-header"><h2>💸 <%= translations.withdraw %></h2></div>
           <div class="card-body">
-            <form method="POST" action="/clientes/business/<%= client.id %>/saque">
+            <form method="POST" action="/clientes/pj/<%= client.id %>/saque">
               <div class="form-group">
                 <label class="form-label"><%= translations.amount %></label>
                 <input type="number" name="amount" step="0.01" min="0.01" max="<%= maxWithdrawal %>" class="form-control" placeholder="0.00" required />

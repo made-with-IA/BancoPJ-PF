@@ -4,59 +4,7 @@ import Database from 'better-sqlite3';
 process.env.DB_PATH = ':memory:';
 
 import app from '../src/app';
-
-function initTestDb() {
-  const { getDatabase } = require('../src/database/connection');
-  const db: Database.Database = getDatabase();
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS individual_clients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      monthly_income REAL NOT NULL DEFAULT 0,
-      age INTEGER NOT NULL,
-      phone TEXT,
-      email TEXT,
-      category TEXT DEFAULT 'standard',
-      balance REAL NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS business_clients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      company_name TEXT NOT NULL,
-      trade_name TEXT NOT NULL,
-      cnpj TEXT NOT NULL UNIQUE,
-      phone TEXT,
-      email TEXT,
-      category TEXT DEFAULT 'standard',
-      balance REAL NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS transactions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      client_id INTEGER NOT NULL,
-      client_type TEXT NOT NULL,
-      transaction_type TEXT NOT NULL,
-      amount REAL NOT NULL,
-      description TEXT,
-      previous_balance REAL NOT NULL,
-      new_balance REAL NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      language TEXT NOT NULL DEFAULT 'pt',
-      currency_format TEXT NOT NULL DEFAULT 'BRL',
-      date_format TEXT NOT NULL DEFAULT 'DD/MM/YYYY',
-      active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    INSERT OR IGNORE INTO settings (language, currency_format, date_format, active) VALUES ('pt', 'BRL', 'DD/MM/YYYY', 1);
-  `);
-  return db;
-}
+import { initTestDb, closeTestDb, clearTestDb } from './helpers/setupDb';
 
 let db: Database.Database;
 let cnpjCounter = 0;
@@ -71,16 +19,16 @@ beforeAll(() => {
 });
 
 afterEach(() => {
-  db.exec('DELETE FROM transactions; DELETE FROM individual_clients; DELETE FROM business_clients;');
+  clearTestDb(db);
+  cnpjCounter = 0;
 });
 
 afterAll(() => {
-  const { closeDatabase } = require('../src/database/connection');
-  closeDatabase();
+  closeTestDb();
 });
 
 describe('Business Client API', () => {
-  test('POST /api/business-clients - should create a business client successfully', async () => {
+  test('POST /api/business-clients - create a business client successfully', async () => {
     const res = await request(app)
       .post('/api/business-clients')
       .send({
@@ -100,25 +48,18 @@ describe('Business Client API', () => {
     expect(res.body.id).toBeDefined();
   });
 
-  test('POST /api/business-clients - should return 400 for missing CNPJ', async () => {
+  test('POST /api/business-clients - return 400 for missing CNPJ', async () => {
     const res = await request(app)
       .post('/api/business-clients')
-      .send({
-        companyName: 'Sem CNPJ Ltda',
-        tradeName: 'SemCNPJ',
-      });
+      .send({ companyName: 'Sem CNPJ Ltda', tradeName: 'SemCNPJ' });
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Validation Error');
   });
 
-  test('GET /api/business-clients - should list business clients with pagination', async () => {
-    await request(app).post('/api/business-clients').send({
-      companyName: 'Alpha Corp', tradeName: 'Alpha', cnpj: nextCnpj(),
-    });
-    await request(app).post('/api/business-clients').send({
-      companyName: 'Beta Corp', tradeName: 'Beta', cnpj: nextCnpj(),
-    });
+  test('GET /api/business-clients - list with pagination', async () => {
+    await request(app).post('/api/business-clients').send({ companyName: 'Alpha Corp', tradeName: 'Alpha', cnpj: nextCnpj() });
+    await request(app).post('/api/business-clients').send({ companyName: 'Beta Corp', tradeName: 'Beta', cnpj: nextCnpj() });
 
     const res = await request(app).get('/api/business-clients?page=1&limit=10');
 
@@ -128,10 +69,26 @@ describe('Business Client API', () => {
     expect(res.body.totalPages).toBe(1);
   });
 
-  test('PUT /api/business-clients/:id - should update a business client', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Old Name S.A.', tradeName: 'Old', cnpj: nextCnpj(), balance: 10000,
-    });
+  test('GET /api/business-clients - filter by category', async () => {
+    await request(app).post('/api/business-clients').send({ companyName: 'Std Corp', tradeName: 'Std', cnpj: nextCnpj(), category: 'standard' });
+    await request(app).post('/api/business-clients').send({ companyName: 'Corp PJ', tradeName: 'Corp', cnpj: nextCnpj(), category: 'corporate' });
+
+    const res = await request(app).get('/api/business-clients?category=corporate');
+
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.data[0].companyName).toBe('Corp PJ');
+  });
+
+  test('GET /api/business-clients/:id - return 404 for non-existent client', async () => {
+    const res = await request(app).get('/api/business-clients/99999');
+    expect(res.status).toBe(404);
+  });
+
+  test('PUT /api/business-clients/:id - update a business client', async () => {
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Old Name S.A.', tradeName: 'Old', cnpj: nextCnpj(), balance: 10000 });
 
     const id = createRes.body.id;
 
@@ -143,10 +100,17 @@ describe('Business Client API', () => {
     expect(updateRes.body.companyName).toBe('New Name S.A.');
   });
 
-  test('DELETE /api/business-clients/:id - should delete a business client', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Delete Me Ltda', tradeName: 'DeleteMe', cnpj: nextCnpj(),
-    });
+  test('PUT /api/business-clients/:id - return 404 for non-existent client', async () => {
+    const res = await request(app)
+      .put('/api/business-clients/99999')
+      .send({ companyName: 'Ghost Corp' });
+    expect(res.status).toBe(404);
+  });
+
+  test('DELETE /api/business-clients/:id - delete a business client', async () => {
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Delete Me Ltda', tradeName: 'DeleteMe', cnpj: nextCnpj() });
 
     const id = createRes.body.id;
     const deleteRes = await request(app).delete(`/api/business-clients/${id}`);
@@ -157,9 +121,9 @@ describe('Business Client API', () => {
   });
 
   test('POST /api/business-clients/:id/withdraw - valid withdrawal for business client', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Saque PJ Ltda', tradeName: 'SaquePJ', cnpj: nextCnpj(), balance: 20000,
-    });
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Saque PJ Ltda', tradeName: 'SaquePJ', cnpj: nextCnpj(), balance: 20000 });
 
     const id = createRes.body.id;
 
@@ -173,10 +137,10 @@ describe('Business Client API', () => {
     expect(withdrawRes.body.previousBalance).toBe(20000);
   });
 
-  test('POST /api/business-clients/:id/withdraw - should fail on insufficient balance', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Sem Saldo PJ', tradeName: 'SemSaldoPJ', cnpj: nextCnpj(), balance: 500,
-    });
+  test('POST /api/business-clients/:id/withdraw - fail on insufficient balance', async () => {
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Sem Saldo PJ', tradeName: 'SemSaldoPJ', cnpj: nextCnpj(), balance: 500 });
 
     const id = createRes.body.id;
 
@@ -188,10 +152,10 @@ describe('Business Client API', () => {
     expect(withdrawRes.body.message).toContain('Saldo insuficiente');
   });
 
-  test('POST /api/business-clients/:id/withdraw - should fail when exceeding business limit of 5000', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Limite PJ Ltda', tradeName: 'LimitePJ', cnpj: nextCnpj(), balance: 100000,
-    });
+  test('POST /api/business-clients/:id/withdraw - fail when exceeding business limit of 5000', async () => {
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Limite PJ Ltda', tradeName: 'LimitePJ', cnpj: nextCnpj(), balance: 100000 });
 
     const id = createRes.body.id;
 
@@ -203,10 +167,17 @@ describe('Business Client API', () => {
     expect(withdrawRes.body.message).toContain('limite');
   });
 
-  test('GET /api/business-clients/:id/statement - should return statement', async () => {
-    const createRes = await request(app).post('/api/business-clients').send({
-      companyName: 'Extrato PJ Ltda', tradeName: 'ExtratoPJ', cnpj: nextCnpj(), balance: 30000,
-    });
+  test('POST /api/business-clients/:id/withdraw - fail for non-existent client', async () => {
+    const res = await request(app)
+      .post('/api/business-clients/99999/withdraw')
+      .send({ amount: 100 });
+    expect(res.status).toBe(404);
+  });
+
+  test('GET /api/business-clients/:id/statement - return statement', async () => {
+    const createRes = await request(app)
+      .post('/api/business-clients')
+      .send({ companyName: 'Extrato PJ Ltda', tradeName: 'ExtratoPJ', cnpj: nextCnpj(), balance: 30000 });
 
     const id = createRes.body.id;
 

@@ -17,7 +17,7 @@
     <%- include('../partials/errors') %>
 
     <div class="card" style="max-width: 600px;">
-      <div class="card-header"><h2>Preferências do Sistema</h2></div>
+      <div class="card-header"><h2><%= translations.systemPreferences %></h2></div>
       <form method="POST" action="/configuracoes" class="form">
         <div class="card-body">
           <div class="form-group">
@@ -53,15 +53,15 @@
     </div>
 
     <div class="card mt-4" style="max-width: 600px;">
-      <div class="card-header"><h2>ℹ️ Informações do Sistema</h2></div>
+      <div class="card-header"><h2>ℹ️ <%= translations.systemInfo %></h2></div>
       <div class="card-body">
         <div class="detail-grid">
           <div class="detail-item">
-            <span class="detail-label">Limite de Saque - Pessoa Física</span>
+            <span class="detail-label"><%= translations.withdrawalLimit %> - <%= translations.individualClient %></span>
             <span class="detail-value badge badge-info">R$ 1.000,00</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Limite de Saque - Pessoa Jurídica</span>
+            <span class="detail-label"><%= translations.withdrawalLimit %> - <%= translations.businessClient %></span>
             <span class="detail-value badge badge-info">R$ 5.000,00</span>
           </div>
           <div class="detail-item">

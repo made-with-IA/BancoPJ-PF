@@ -12,7 +12,7 @@
     <div class="page-header">
       <h1>🧑 <%= translations.individualClient %></h1>
       <div class="page-actions">
-        <a href="/clientes/individual/novo" class="btn btn-primary">+ <%= translations.newClient %></a>
+        <a href="/clientes/pf/novo" class="btn btn-primary">+ <%= translations.newClient %></a>
         <a href="/api/exports/individual-clients/pdf<%= Object.keys(filters).filter(k => filters[k]).length > 0 ? '?' + Object.entries(filters).filter(([k,v]) => v).map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&') : '' %>" class="btn btn-outline" target="_blank"><%= translations.exportPdf %></a>
         <a href="/api/exports/individual-clients/csv<%= Object.keys(filters).filter(k => filters[k]).length > 0 ? '?' + Object.entries(filters).filter(([k,v]) => v).map(([k,v]) => k + '=' + encodeURIComponent(v)).join('&') : '' %>" class="btn btn-outline"><%= translations.exportCsv %></a>
       </div>
@@ -22,7 +22,7 @@
 
     <!-- Filters -->
     <div class="card filter-card">
-      <form method="GET" action="/clientes/individual" class="filter-form">
+      <form method="GET" action="/clientes/pf" class="filter-form">
         <div class="filter-grid">
           <div class="form-group">
             <label><%= translations.fullName %></label>
@@ -35,10 +35,10 @@
           <div class="form-group">
             <label><%= translations.category %></label>
             <select name="category" class="form-control">
-              <option value="">Todas</option>
-              <option value="standard" <%= filters.category === 'standard' ? 'selected' : '' %>>Padrão</option>
-              <option value="premium" <%= filters.category === 'premium' ? 'selected' : '' %>>Premium</option>
-              <option value="vip" <%= filters.category === 'vip' ? 'selected' : '' %>>VIP</option>
+              <option value=""><%= translations.allCategories %></option>
+              <option value="standard" <%= filters.category === 'standard' ? 'selected' : '' %>><%= translations.standard %></option>
+              <option value="premium" <%= filters.category === 'premium' ? 'selected' : '' %>><%= translations.premium %></option>
+              <option value="vip" <%= filters.category === 'vip' ? 'selected' : '' %>><%= translations.vip %></option>
             </select>
           </div>
           <div class="form-group">
@@ -52,7 +52,7 @@
         </div>
         <div class="filter-actions">
           <button type="submit" class="btn btn-primary"><%= translations.filter %></button>
-          <a href="/clientes/individual" class="btn btn-outline"><%= translations.clearFilters %></a>
+          <a href="/clientes/pf" class="btn btn-outline"><%= translations.clearFilters %></a>
         </div>
       </form>
     </div>
@@ -72,7 +72,7 @@
                 <th><%= translations.category %></th>
                 <th><%= translations.age %></th>
                 <th><%= translations.balance %></th>
-                <th>Ações</th>
+                <th><%= translations.actions %></th>
               </tr>
             </thead>
             <tbody>
@@ -86,10 +86,10 @@
                   <td class="text-right"><strong><%= client.formattedBalance %></strong></td>
                   <td>
                     <div class="action-btns">
-                      <a href="/clientes/individual/<%= client.id %>" class="btn btn-sm btn-info" title="Detalhes">👁</a>
-                      <a href="/clientes/individual/<%= client.id %>/editar" class="btn btn-sm btn-warning" title="<%= translations.edit %>">✏️</a>
-                      <a href="/clientes/individual/<%= client.id %>/extrato" class="btn btn-sm btn-blue" title="<%= translations.statement %>">📋</a>
-                      <form method="POST" action="/clientes/individual/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
+                      <a href="/clientes/pf/<%= client.id %>" class="btn btn-sm btn-info" title="<%= translations.viewDetails %>">👁</a>
+                      <a href="/clientes/pf/<%= client.id %>/editar" class="btn btn-sm btn-warning" title="<%= translations.edit %>">✏️</a>
+                      <a href="/clientes/pf/<%= client.id %>/extrato" class="btn btn-sm btn-blue" title="<%= translations.statement %>">📋</a>
+                      <form method="POST" action="/clientes/pf/<%= client.id %>/excluir" class="inline-form" onsubmit="return confirm('<%= translations.confirmDelete %>')">
                         <button type="submit" class="btn btn-sm btn-danger" title="<%= translations.delete %>">🗑</button>
                       </form>
                     </div>
