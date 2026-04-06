@@ -1,0 +1,281 @@
+# PRD — Sistema Bancário
+**Versão:** 1.0  
+**Data:** Abril de 2026  
+**Status:** Implementado e auditado
+
+---
+
+## 1. Visão do Produto
+
+### 1.1 Objetivo
+
+Construir um sistema de gerenciamento bancário interno, em português, que permita a operadores registrar e gerenciar contas de clientes Pessoa Física (PF) e Pessoa Jurídica (PJ), realizar operações financeiras básicas e exportar relatórios.
+
+### 1.2 Público-Alvo
+
+Operadores internos de uma instituição financeira que necessitam de uma interface web simples e rápida para gerenciar clientes e transações do dia a dia.
+
+### 1.3 Proposta de Valor
+
+- Interface 100% em português, sem dependência de frameworks JavaScript no front-end
+- Operação offline-first (SQLite local)
+- Exportação imediata de relatórios em PDF e CSV
+- Configurações de idioma e formato adaptáveis por operador
+
+---
+
+## 2. Escopo
+
+### 2.1 Dentro do Escopo
+
+- Cadastro completo de clientes PF (nome, idade, renda, e-mail, telefone, categoria, saldo)
+- Cadastro completo de clientes PJ (razão social, nome fantasia, CNPJ, categoria, saldo)
+- Operações de saque com validação de limites por tipo de cliente
+- Extrato de transações com paginação
+- Exportação de relatórios em PDF e CSV (com filtros)
+- Filtros de busca por nome, e-mail, categoria e faixa de saldo
+- Paginação em todas as listagens
+- Configurações de idioma (PT/EN), moeda (BRL/USD/EUR) e formato de data
+- API REST para integração com outros sistemas
+- Cobertura de testes automatizados (34 testes em 3 suites)
+
+### 2.2 Fora do Escopo
+
+- Autenticação e controle de acesso de usuários
+- Operações de depósito via interface (apenas via API)
+- Transferências entre contas
+- Integração com sistemas bancários externos
+- Aplicativo mobile
+
+---
+
+## 3. Personas e Casos de Uso
+
+### 3.1 Operador Bancário
+
+**Objetivo:** Gerenciar o cadastro de clientes e realizar operações.
+
+**Casos de uso principais:**
+
+| ID | Caso de Uso | Prioridade |
+|----|-------------|------------|
+| UC-01 | Cadastrar novo cliente PF | Alta |
+| UC-02 | Cadastrar novo cliente PJ | Alta |
+| UC-03 | Visualizar detalhes de cliente | Alta |
+| UC-04 | Editar dados de cliente | Média |
+| UC-05 | Excluir cliente | Média |
+| UC-06 | Realizar saque de conta PF | Alta |
+| UC-07 | Realizar saque de conta PJ | Alta |
+| UC-08 | Consultar extrato de conta | Alta |
+| UC-09 | Exportar relatório PDF | Média |
+| UC-10 | Exportar relatório CSV | Média |
+| UC-11 | Filtrar clientes por critérios | Média |
+| UC-12 | Alterar idioma da interface | Baixa |
+| UC-13 | Alterar formato de moeda e data | Baixa |
+
+---
+
+## 4. Requisitos Funcionais
+
+### 4.1 Gestão de Clientes PF
+
+| ID | Requisito |
+|----|-----------|
+| RF-01 | O sistema deve permitir cadastrar clientes PF com: nome completo (obrigatório), idade (obrigatório, 18-120), renda mensal (obrigatório, > 0), saldo inicial, e-mail, telefone e categoria |
+| RF-02 | O sistema deve listar clientes PF com paginação de 10 itens por página |
+| RF-03 | O sistema deve permitir filtrar clientes PF por nome, e-mail, categoria e faixa de saldo |
+| RF-04 | O sistema deve permitir editar todos os campos de um cliente PF existente |
+| RF-05 | O sistema deve permitir excluir um cliente PF, removendo também seu histórico de transações |
+| RF-06 | O sistema deve exibir o detalhe completo de um cliente PF com saldo atual e limite de saque |
+
+### 4.2 Gestão de Clientes PJ
+
+| ID | Requisito |
+|----|-----------|
+| RF-07 | O sistema deve permitir cadastrar clientes PJ com: razão social (obrigatório), nome fantasia (obrigatório), CNPJ (obrigatório, único), saldo inicial e categoria |
+| RF-08 | O sistema deve listar clientes PJ com paginação de 10 itens por página |
+| RF-09 | O sistema deve permitir filtrar clientes PJ por razão social, nome fantasia, CNPJ, categoria e faixa de saldo |
+| RF-10 | O sistema deve permitir editar todos os campos de um cliente PJ existente |
+| RF-11 | O sistema deve permitir excluir um cliente PJ, removendo também seu histórico de transações |
+| RF-12 | O sistema deve exibir o detalhe completo de um cliente PJ com saldo atual e limite de saque |
+
+### 4.3 Operações Financeiras
+
+| ID | Requisito |
+|----|-----------|
+| RF-13 | O sistema deve permitir saques de contas PF com limite máximo de R$ 1.000,00 por operação |
+| RF-14 | O sistema deve permitir saques de contas PJ com limite máximo de R$ 5.000,00 por operação |
+| RF-15 | O sistema deve rejeitar saques quando o valor exceder o limite do tipo de cliente |
+| RF-16 | O sistema deve rejeitar saques quando o saldo for insuficiente |
+| RF-17 | Cada saque deve ser executado atomicamente (transação SQLite) |
+| RF-18 | Cada saque bem-sucedido deve gerar um registro de transação com timestamp |
+
+### 4.4 Extrato
+
+| ID | Requisito |
+|----|-----------|
+| RF-19 | O sistema deve exibir o extrato de transações de qualquer cliente com paginação |
+| RF-20 | O extrato deve exibir: data/hora, tipo (saque/depósito), valor e saldo após a operação |
+| RF-21 | O extrato deve exibir o saldo atual do cliente |
+
+### 4.5 Exportações
+
+| ID | Requisito |
+|----|-----------|
+| RF-22 | O sistema deve exportar a listagem de clientes PF em PDF |
+| RF-23 | O sistema deve exportar a listagem de clientes PF em CSV |
+| RF-24 | O sistema deve exportar a listagem de clientes PJ em PDF |
+| RF-25 | O sistema deve exportar a listagem de clientes PJ em CSV |
+| RF-26 | As exportações devem respeitar os filtros ativos da listagem |
+
+### 4.6 Dashboard
+
+| ID | Requisito |
+|----|-----------|
+| RF-27 | O dashboard deve exibir o total de clientes PF e PJ cadastrados |
+| RF-28 | O dashboard deve exibir o total de saques realizados |
+| RF-29 | O dashboard deve exibir o saldo total consolidado de todos os clientes |
+
+### 4.7 Configurações
+
+| ID | Requisito |
+|----|-----------|
+| RF-30 | O sistema deve permitir alternar o idioma da interface entre português e inglês |
+| RF-31 | O sistema deve permitir configurar o formato de moeda: BRL, USD ou EUR |
+| RF-32 | O sistema deve permitir configurar o formato de data: DD/MM/YYYY, MM/DD/YYYY ou YYYY-MM-DD |
+| RF-33 | As configurações devem ser aplicadas imediatamente a toda a interface |
+| RF-34 | O idioma padrão deve ser português (pt) |
+
+---
+
+## 5. Requisitos Não-Funcionais
+
+| ID | Requisito |
+|----|-----------|
+| RNF-01 | A aplicação deve ser server-rendered (sem framework JS no front-end) |
+| RNF-02 | O banco de dados deve ser SQLite com transações atômicas para operações financeiras |
+| RNF-03 | A aplicação deve responder em menos de 500ms para qualquer operação de leitura |
+| RNF-04 | Todos os endpoints da API devem retornar JSON estruturado com códigos HTTP corretos |
+| RNF-05 | O código deve estar 100% em TypeScript com typecheck sem erros |
+| RNF-06 | A cobertura de testes automatizados deve incluir CRUD, saques, filtros e exportações |
+| RNF-07 | Mensagens de erro devem ser descritivas e em português por padrão |
+| RNF-08 | O sistema deve suportar paginação em todas as listagens |
+| RNF-09 | O CSS deve ser responsivo para diferentes tamanhos de tela |
+
+---
+
+## 6. Arquitetura
+
+### 6.1 Stack
+
+```
+Usuário (Browser)
+      │
+      ▼
+Express 5 (HTTP Server)
+      │
+      ├── EJS Engine (View Rendering)
+      ├── Middlewares (settings, error, method-override)
+      │
+      ├── Web Routes (/clientes/pf, /clientes/pj, /configuracoes)
+      │         └── Controllers
+      │                └── Services
+      │                       └── Repositories
+      │                              └── SQLite (better-sqlite3)
+      │
+      └── API Routes (/api/...)
+                └── Controllers
+                       └── Services
+                              └── Repositories
+```
+
+### 6.2 Decisões de Design
+
+| Decisão | Justificativa |
+|---------|---------------|
+| SQLite com better-sqlite3 | Simplicidade operacional, zero configuração, transações síncronas |
+| EJS como view engine | Server-rendering puro, sem hidratação JavaScript |
+| Repositório + Serviço | Separação clara entre acesso a dados e lógica de negócio |
+| Zod para validação | Validação tipada com mensagens de erro estruturadas |
+| method-override | Suporte a PUT/DELETE via formulários HTML padrão |
+| Transações atômicas em saques | Garantia de consistência: débito e registro acontecem juntos ou nenhum dos dois |
+
+### 6.3 Schema do Banco de Dados
+
+```sql
+individual_clients (
+  id INTEGER PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  age INTEGER NOT NULL,
+  monthly_income REAL NOT NULL,
+  phone TEXT,
+  email TEXT,
+  category TEXT DEFAULT 'standard',
+  balance REAL DEFAULT 0,
+  created_at TEXT,
+  updated_at TEXT
+)
+
+business_clients (
+  id INTEGER PRIMARY KEY,
+  company_name TEXT NOT NULL,
+  trade_name TEXT NOT NULL,
+  cnpj TEXT NOT NULL UNIQUE,
+  category TEXT DEFAULT 'standard',
+  balance REAL DEFAULT 0,
+  created_at TEXT,
+  updated_at TEXT
+)
+
+transactions (
+  id INTEGER PRIMARY KEY,
+  client_id INTEGER NOT NULL,
+  client_type TEXT NOT NULL,  -- 'individual' | 'business'
+  transaction_type TEXT NOT NULL,  -- 'withdrawal' | 'deposit'
+  amount REAL NOT NULL,
+  balance_after REAL NOT NULL,
+  created_at TEXT
+)
+
+settings (
+  id INTEGER PRIMARY KEY,
+  language TEXT DEFAULT 'pt',
+  currency_format TEXT DEFAULT 'BRL',
+  date_format TEXT DEFAULT 'DD/MM/YYYY',
+  active INTEGER DEFAULT 1
+)
+```
+
+---
+
+## 7. Critérios de Aceitação
+
+| Critério | Verificação |
+|----------|-------------|
+| Todas as páginas carregam sem erro (HTTP 200) | Auditoria manual de 12 rotas |
+| Formulários criam e atualizam registros corretamente | Testes automatizados + auditoria |
+| Limite de R$ 1.000 é aplicado para PF | Testes automatizados (boundary tests) |
+| Limite de R$ 5.000 é aplicado para PJ | Testes automatizados (boundary tests) |
+| Extrato exibe transações após saque | Auditoria + testes |
+| PDF e CSV são gerados com Content-Type correto | Auditoria de headers HTTP |
+| Interface exibe em português por padrão | Verificação de strings na resposta HTML |
+| Troca de idioma altera interface imediatamente | Auditoria de toggle PT/EN |
+| TypeScript sem erros de tipo | `pnpm typecheck` retorna 0 erros |
+| 34 testes passam | `pnpm test` retorna 34 passed |
+
+---
+
+## 8. Entregáveis
+
+| Entregável | Status |
+|------------|--------|
+| Aplicação web completa (PF + PJ CRUD) | Concluído |
+| API REST documentada | Concluído |
+| Exportação PDF e CSV | Concluído |
+| Internacionalização PT/EN | Concluído |
+| Dashboard com resumo | Concluído |
+| Seed de dados de exemplo | Concluído |
+| Suite de testes (34 testes) | Concluído |
+| README.md | Concluído |
+| PRD | Concluído |
+| Registro de erros e correções | Concluído |
