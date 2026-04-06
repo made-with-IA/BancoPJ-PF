@@ -1,10 +1,31 @@
-id = "banking-system"
-artifactType = "webview"
-title = "Sistema Bancário"
-slug = "banking-system"
-previewPath = "/"
+kind = "api"
+previewPath = "/api/"
+title = "Sistema Bancário — API"
+version = "1.0.0"
+id = "artifacts/banking-system"
 
 [[services]]
-name = "web"
-port = 3000
-devCommand = "pnpm --filter @workspace/banking-system run dev"
+name = "api"
+paths = [ "/api/" ]
+localPort = 3000
+
+[services.development]
+run = "pnpm --filter @workspace/banking-system run dev"
+
+[services.production]
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/banking-system", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["node", "artifacts/banking-system/dist/server.js"]
+
+[services.production.run.env]
+PORT = "3000"
+NODE_ENV = "production"
+
+[services.production.health.startup]
+path = "/api/healthz"

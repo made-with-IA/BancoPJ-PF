@@ -45,6 +45,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check
+app.get('/api/healthz', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Routes
 app.use('/', webRoutes);
 app.use('/api', apiRoutes);

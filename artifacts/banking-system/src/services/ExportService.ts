@@ -17,7 +17,7 @@ export class ExportService {
     res: Response
   ): void {
     const translations = getTranslations(settings.language);
-    const doc = new PDFDocument({ margin: 40 });
+    const doc = new PDFDocument({ margins: { top: 40, left: 40, bottom: 40, right: 40 } });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="clientes-pf.pdf"');
@@ -78,7 +78,7 @@ export class ExportService {
     res: Response
   ): void {
     const translations = getTranslations(settings.language);
-    const doc = new PDFDocument({ margin: 40 });
+    const doc = new PDFDocument({ margins: { top: 40, left: 40, bottom: 40, right: 40 } });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="clientes-pj.pdf"');
